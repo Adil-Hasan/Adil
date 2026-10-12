@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#141414" />
+    <meta name="description" content="Adil Hasan. Why fight with a template everyday when you can just press a button?" />
+    <title>Adil Hasan</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <canvas id="dot-grid" aria-hidden="true"></canvas>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="wordmark" href="#home" aria-label="Adil Hasan, home">Adil Hasan</a>
+      <nav aria-label="Main navigation">
+        <a href="#projects">Projects</a>
+        <a href="#career">Career</a>
+        <a href="#framegen">FrameGen</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" id="home" aria-label="Introduction">
+        <figure class="hero-quote">
+          <svg class="quote-mark" viewBox="0 0 14 14" aria-hidden="true">
+            <path d="M6.34375 3.9375l0 4.8125q0 1.09375-0.76563 1.85938-0.76563 0.76563-1.85937 0.76562-0.16406 0-0.30078-0.13672-0.13672-0.13672-0.13672-0.30078 0-0.16406 0.13672-0.30078 0.13672-0.13672 0.30078-0.13672 0.71094 0 1.23047-0.51953 0.51953-0.51953 0.51953-1.23047l0-0.4375-3.28125 0q-0.38281 0-0.62891-0.24609-0.24609-0.24609-0.24609-0.62891l0-3.5q0-0.38281 0.24609-0.62891 0.24609-0.24609 0.62891-0.24609l3.28125 0q0.38281 0 0.62891 0.24609 0.24609 0.24609 0.24609 0.62891z m5.46875-0.875l-3.28125 0q-0.38281 0-0.62891 0.24609-0.24609 0.24609-0.24609 0.62891l0 3.5q0 0.38281 0.24609 0.62891 0.24609 0.24609 0.62891 0.24609l3.28125 0 0 0.4375q0 0.71094-0.51953 1.23047-0.51953 0.51953-1.23047 0.51953-0.16406 0-0.30078 0.13672-0.13672 0.13672-0.13672 0.30078 0 0.16406 0.13672 0.30078 0.13672 0.13672 0.30078 0.13672 1.09375 0 1.85938-0.76563 0.76563-0.76563 0.76562-1.85937l0-4.8125q0-0.38281-0.24609-0.62891-0.24609-0.24609-0.62891-0.24609z" />
+          </svg>
+          <blockquote>
+            <h1>
+              <span class="quote-line">Why fight with a template</span>
+              <span class="quote-line">everyday when you can</span>
+              <span class="quote-line last-line">just press a <button class="physical-button" type="button"><span class="button-face">button</span></button><span class="question-mark">?</span></span>
+            </h1>
+          </blockquote>
+          <figcaption>
+            <span class="signature">- Adil</span>
+            <span class="aside">(guy who was so mad at repeating designs that he made an entire tool to do that for him.)</span>
+          </figcaption>
+        </figure>
+        <a class="scroll-cue" href="#projects" aria-label="Scroll to projects">
+          <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M11.53906 6.83594q0.05469 0.05469 0.05469 0.16406 0 0.10938-0.05469 0.16406l-4.375 4.375q-0.05469 0.05469-0.16406 0.05469-0.10938 0-0.16406-0.05469l-4.375-4.375q-0.10938-0.10938-0.08203-0.24609 0.02734-0.13672 0.16406-0.16406 0.13672-0.02734 0.24609 0.08203l4.21094 4.21094 4.21094-4.21094q0.05469-0.05469 0.16406-0.05469 0.10938 0 0.16406 0.05469z m-4.70312 0.32812q0.05469 0.05469 0.16406 0.05469 0.10938 0 0.16406-0.05469l4.375-4.375q0.10938-0.10938 0.08203-0.24609-0.02734-0.13672-0.16406-0.16406-0.13672-0.02734-0.24609 0.08203l-4.21094 4.21094-4.21094-4.21094q-0.05469-0.05469-0.13672-0.02735-0.08203 0.02734-0.13671 0.08204-0.05469 0.05469-0.08204 0.13671-0.02734 0.08203 0.02735 0.13672l4.375 4.375z" /></svg>
+        </a>
+        <span class="sr-only" id="button-status" role="status"></span>
+      </section>
+      <div class="content-sections">
+        <section class="content-section" id="projects" aria-labelledby="projects-title">
+          <h2 id="projects-title">Projects</h2>
+          <div class="section-content"></div>
+        </section>
+        <section class="content-section" id="career" aria-labelledby="career-title">
+          <h2 id="career-title">Career</h2>
+          <div class="section-content"></div>
+        </section>
+        <section class="content-section" id="framegen" aria-labelledby="framegen-title">
+          <h2 id="framegen-title">FrameGen</h2>
+          <div class="section-content"></div>
+        </section>
+        <section class="content-section" id="contact" aria-labelledby="contact-title">
+          <h2 id="contact-title">Contact</h2>
+          <div class="section-content"></div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
