@@ -5,7 +5,7 @@ import { dirname, extname, resolve, sep } from 'node:path';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 5173);
-const publicFiles = new Set(['index.html', 'styles.css', 'app.js', 'project-gallery.js', 'projects.json', 'favicon.svg']);
+const publicFiles = new Set(['index.html', 'styles.css', 'app.js', 'poster-playground.js', 'poster-physics.js', 'poster-layout.js', 'project-gallery.js', 'career-flow.js', 'projects.json', 'favicon.svg', 'error-details.svg', 'Adil-assets/image.png']);
 const assetRoot = resolve(root, 'projects') + sep;
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.avif': 'image/avif', '.gif': 'image/gif' };
 

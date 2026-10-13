@@ -1,9 +1,12 @@
+import { burstDesigns, canBurstDesigns } from './poster-playground.js';
+
 const canvas = document.querySelector('#dot-grid');
 const context = canvas.getContext('2d');
 const header = document.querySelector('.site-header');
 const navigationLinks = [...header.querySelectorAll('a[href^="#"]')];
 const sections = [...document.querySelectorAll('main section[id]')];
 const button = document.querySelector('.physical-button');
+const buttonFace = button.querySelector('.button-face');
 const status = document.querySelector('#button-status');
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -14,7 +17,7 @@ let grid = [];
 let animation = 0;
 let navigationFrame = 0;
 let pointerInside = false;
-let pressTimer;
+let pressAnimation;
 let statusTimer;
 let ambientTimer;
 let ripples = [];
@@ -69,7 +72,7 @@ function draw(now = performance.now()) {
 }
 
 function requestDraw() {
-  if (!animation) animation = requestAnimationFrame(draw);
+  if (!animation && canBurstDesigns()) animation = requestAnimationFrame(draw);
 }
 
 function addRipple(x, y, { duration = 1100, speed = 0.4, ringWidth = 38, intensity = 1 } = {}) {
@@ -80,7 +83,7 @@ function addRipple(x, y, { duration = 1100, speed = 0.4, ringWidth = 38, intensi
 function scheduleAmbientWave(initial = false) {
   clearTimeout(ambientTimer);
   ambientTimer = undefined;
-  if (motionPreference.matches || document.hidden || !context || !width || !height) return;
+  if (motionPreference.matches || document.hidden || !context || !width || !height || !canBurstDesigns()) return;
   ambientTimer = setTimeout(() => {
     const angle = Math.random() * Math.PI * 2;
     ambientWaves.push({
@@ -141,19 +144,51 @@ document.documentElement.addEventListener('pointerleave', () => {
 });
 
 button.addEventListener('click', () => {
-  clearTimeout(pressTimer);
+  if (pressAnimation || !canBurstDesigns()) return;
   clearTimeout(statusTimer);
+  const bounds = buttonFace.getBoundingClientRect();
+  const restingStyle = getComputedStyle(buttonFace);
+  const resting = { transform: restingStyle.transform, boxShadow: restingStyle.boxShadow };
+  const pressed = { transform: 'translateY(0)', boxShadow: 'inset 0 1px 2px #0002, 0 0 0 #8a8a8a' };
+  pressAnimation = buttonFace.animate([
+    { ...resting, offset: 0 },
+    { ...pressed, offset: .18 },
+    { ...pressed, offset: .55 },
+    { ...resting, offset: 1 },
+  ], { duration: motionPreference.matches ? 0 : 440, easing: 'cubic-bezier(.2, .8, .2, 1)' });
   button.classList.add('is-pressed');
-  pressTimer = setTimeout(() => button.classList.remove('is-pressed'), 160);
-  status.textContent = 'Button pressed.';
+  button.setAttribute('aria-disabled', 'true');
+  const release = () => {
+    button.classList.remove('is-pressed');
+    if (canBurstDesigns()) button.removeAttribute('aria-disabled');
+    pressAnimation = undefined;
+  };
+  pressAnimation.finished.then(release, release);
+  status.textContent = 'Design posters scattered.';
   statusTimer = setTimeout(() => { status.textContent = ''; }, 1100);
-  if (motionPreference.matches) return;
-  const bounds = button.getBoundingClientRect();
+  const x = bounds.left + bounds.width / 2;
+  const y = bounds.top + bounds.height / 2;
+  burstDesigns(x, y);
+  if (motionPreference.matches || !canBurstDesigns()) return;
   const canvasBounds = canvas.getBoundingClientRect();
-  addRipple(bounds.left + bounds.width / 2 - canvasBounds.left, bounds.top + bounds.height / 2 - canvasBounds.top);
+  addRipple(x - canvasBounds.left, y - canvasBounds.top);
+});
+
+button.addEventListener('keydown', (event) => {
+  if (event.repeat && (event.key === 'Enter' || event.key === ' ')) event.preventDefault();
+});
+window.addEventListener('poster-crash', () => {
+  cancelAnimationFrame(animation);
+  animation = 0;
+  clearTimeout(ambientTimer);
+  ambientTimer = undefined;
+  pressAnimation?.cancel();
 });
 
 motionPreference.addEventListener('change', () => {
+  if (motionPreference.matches) {
+    pressAnimation?.finish();
+  }
   ripples = [];
   ambientWaves = [];
   centerPointer();
@@ -162,6 +197,7 @@ motionPreference.addEventListener('change', () => {
 });
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
+    pressAnimation?.cancel();
     cancelAnimationFrame(animation);
     animation = 0;
     ripples = [];
@@ -184,7 +220,7 @@ function updateNavigation() {
     if (link.hash === `#${currentSection.id}`) link.setAttribute('aria-current', 'location');
     else link.removeAttribute('aria-current');
   }
-  header.classList.toggle('is-scrolled', window.scrollY > 8);
+  header.classList.toggle('is-scrolled', header.getBoundingClientRect().top <= 1);
 }
 
 function requestNavigationUpdate() {

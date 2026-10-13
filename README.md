@@ -10,6 +10,20 @@ npm run dev
 
 Open http://localhost:5173. Use the local server rather than opening `index.html` directly, because the project content loads from JSON.
 
+## Poster playground
+
+The hero button scatters posters that collect at the bottom of the viewport and collide with each other, visible navigation text, headings, and project artwork as you scroll. Posters tumble off content and can be grabbed, dragged, and thrown. Further presses wait until the button pops back out. Stars fade away; posters remain until you clean them.
+
+The cleanup chat appears after seven accepted presses. Click the vacuum icon to pick it up; the button becomes an empty outline while the vacuum is in use. Move or drag near posters to suck them up, or move the vacuum with the arrow keys. Cleaning every poster resets the press count and keeps the vacuum as a gift. Clicking the empty outline or pressing Escape puts it away and restores the icon.
+
+The chat pops into view and rises above posters piled beneath it. Five more presses turn it red with "Please! Stop! Clean up!" You can keep pressing. When posters cover most of the viewport, the page shows a platform-themed crash screen. Reloading clears the pile and shows "Don't do it again." once. The pile lasts for the current page visit; only the reload reminder uses session storage.
+
+Each message has a portrait and a close button. Closing it animates it away. In the red phase, another accepted hero-button press brings the warning back, including during the closing animation. Picking up the vacuum briefly shows "Oooh, nice." Error screens include a scannable, clickable QR code with an encoded destination; it sits beside the full error content on large screens.
+
+The Career section contains a four-chapter demo with sample roles and dates. Scroll through it or use the chapter guide and next button. Each paper card reveals on arrival, its artefact tilts with the pointer, and the notebook controls expand the story. The guide stays beside the cards on desktop and becomes a compact sticky route on mobile. The last chapter can replay the journey. Career content is in `index.html`, with motion and navigation in `career-flow.js`; reduced-motion preferences are respected.
+
+Run `npm test` for the physics checks, including stacking, moving surfaces, suction, and reduced motion.
+
 ## Update the project folders
 
 All project content lives in **`projects.json`**. Each entry in `folders` becomes a clickable folder with its title centered on the front, and its first three images spill out of the preview. Clicking the folder shows all its images in a three-column grid inside Projects, with names beneath them and the folder name as the section heading. The Back button returns to the folders with a smooth fade and slide transition. Reduced-motion preferences skip the animation. The section grows for additional rows, with two columns on tablets and one on phones.

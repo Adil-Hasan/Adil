@@ -17,7 +17,7 @@ function element(tag, className, text) {
 
 function scrollToProjects() {
   // A tall folder or image view can shrink; keep its navigation on screen.
-  window.scrollTo({ top: projectsSection.offsetTop, behavior: projectMotion.matches ? 'instant' : 'smooth' });
+  projectsSection.scrollIntoView({ block: 'start', behavior: projectMotion.matches ? 'instant' : 'smooth' });
 }
 
 async function transitionProjectView(outgoing, incoming, update, focusTarget, returning = false) {

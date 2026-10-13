@@ -20,6 +20,7 @@ for (const folder of folders) {
   }
 }
 await mkdir(output, { recursive: true });
-await Promise.all(['index.html', 'styles.css', 'app.js', 'project-gallery.js', 'projects.json', 'favicon.svg'].map((file) => copyFile(join(root, file), join(output, file))));
+await mkdir(join(output, 'Adil-assets'), { recursive: true });
+await Promise.all(['index.html', 'styles.css', 'app.js', 'poster-playground.js', 'poster-physics.js', 'poster-layout.js', 'project-gallery.js', 'career-flow.js', 'projects.json', 'favicon.svg', 'error-details.svg', 'Adil-assets/image.png'].map((file) => copyFile(join(root, file), join(output, file))));
 await cp(join(root, 'projects'), join(output, 'projects'), { recursive: true });
 console.log('Built static site in dist/');
