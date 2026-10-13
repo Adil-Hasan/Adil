@@ -1,0 +1,31 @@
+{
+  "folders": [
+    {
+      "title": "Design",
+      "color": "#d5b77c",
+      "images": [
+        { "src": "./projects/design/01.svg", "alt": "Sample typographic poster with large letterforms", "title": "Typography study · sample preview" },
+        { "src": "./projects/design/02.svg", "alt": "Sample blue geometric identity study", "title": "Identity study · sample preview" },
+        { "src": "./projects/design/03.svg", "alt": "Sample coral editorial layout", "title": "Editorial study · sample preview" }
+      ]
+    },
+    {
+      "title": "FrameGen",
+      "color": "#a7b8a0",
+      "images": [
+        { "src": "./projects/framegen/01.svg", "alt": "Illustration of data flowing into a design grid", "title": "Data to design · sample preview" },
+        { "src": "./projects/framegen/02.svg", "alt": "Illustration of repeated frames in a production workflow", "title": "Frame workflow · sample preview" },
+        { "src": "./projects/framegen/03.svg", "alt": "FrameGen typographic concept artwork", "title": "FrameGen concept · sample preview" }
+      ]
+    },
+    {
+      "title": "Experiments",
+      "color": "#b0a6cc",
+      "images": [
+        { "src": "./projects/experiments/01.svg", "alt": "Sample green halftone sphere experiment", "title": "Halftone study · sample preview" },
+        { "src": "./projects/experiments/02.svg", "alt": "Sample orange concentric shape experiment", "title": "Shape study · sample preview" },
+        { "src": "./projects/experiments/03.svg", "alt": "Sample violet orbital composition", "title": "Orbit study · sample preview" }
+      ]
+    }
+  ]
+}
