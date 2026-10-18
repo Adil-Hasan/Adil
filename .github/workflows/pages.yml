@@ -28,12 +28,20 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install dependencies
+        run: npm ci
       - name: Validate JavaScript
         run: npm run check
+      - name: Run physics and layout tests
+        run: npm test
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
       - name: Build static site
         run: npm run build
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
       - name: Upload site
         uses: actions/upload-pages-artifact@v4
         with:

@@ -116,7 +116,7 @@ function createFolder(folder) {
 
 async function loadFolders() {
   try {
-    const response = await fetch('./projects.json', { cache: 'no-cache' });
+    const response = await fetch(`${import.meta.env.BASE_URL}projects.json`, { cache: 'no-cache' });
     if (!response.ok) throw new Error(`Project file returned ${response.status}`);
     const { folders } = await response.json();
     if (!Array.isArray(folders)) throw new Error('projects.json needs a folders array.');
@@ -128,6 +128,9 @@ async function loadFolders() {
         if (!image.src || !image.alt) throw new Error('Every image needs src and alt text.');
         const url = new URL(image.src, document.baseURI);
         if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Images must use local paths or HTTPS URLs.');
+        image.src = /^https?:\/\//.test(image.src)
+          ? image.src
+          : `${import.meta.env.BASE_URL}${image.src.replace(/^\.\//, '')}`;
       }
     }
     folderContainer.replaceChildren(...folders.map(createFolder));

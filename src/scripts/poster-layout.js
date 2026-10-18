@@ -23,10 +23,10 @@ export function screenCoverage(posters, { width, height }) {
     if (!['loose', 'dragging'].includes(poster.mode) || poster.age < .3) continue;
     const scale = poster.scale;
     const extent = posterExtents(poster);
-    const startColumn = Math.max(0, Math.floor((poster.x - extent.x * scale) / cellWidth));
-    const endColumn = Math.min(columns - 1, Math.floor((poster.x + extent.x * scale) / cellWidth));
-    const startRow = Math.max(0, Math.floor((poster.y - extent.y * scale) / cellHeight));
-    const endRow = Math.min(rows - 1, Math.floor((poster.y + extent.y * scale) / cellHeight));
+    const startColumn = Math.max(0, Math.floor((poster.x - extent.x) / cellWidth));
+    const endColumn = Math.min(columns - 1, Math.floor((poster.x + extent.x) / cellWidth));
+    const startRow = Math.max(0, Math.floor((poster.y - extent.y) / cellHeight));
+    const endRow = Math.min(rows - 1, Math.floor((poster.y + extent.y) / cellHeight));
     const cosine = Math.cos(poster.angle);
     const sine = Math.sin(poster.angle);
     for (let row = startRow; row <= endRow; row++) {

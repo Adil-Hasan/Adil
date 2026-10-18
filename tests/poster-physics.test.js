@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createPoster, posterExtents, posterOverlap, stepPosters } from '../poster-physics.js';
+import { createPoster, posterExtents, posterOverlap, stepPosters } from '../src/scripts/poster-physics.js';
 
 const bounds = { width: 800, height: 600 };
 function advance(posters, seconds, options = {}) {
@@ -18,6 +18,37 @@ test('posters settle inside the viewport and persist', () => {
   assert.equal(poster.asleep, true);
   assert.ok(poster.x >= extent.x && poster.x <= bounds.width - extent.x);
   assert.ok(Math.abs(poster.y + extent.y - bounds.height) < .5);
+});
+
+test('new posters collide with each other on their first frame', () => {
+  const a = createPoster({ x: 300, y: 250, size: 60, vx: 120 });
+  const b = createPoster({ x: 350, y: 250, size: 60, vx: -120 });
+  stepPosters([a, b], { dt: 1 / 60, bounds, gravity: 0 });
+  assert.ok(a.vx < 0 && b.vx > 0, 'contact should reverse the approaching velocities immediately');
+  assert.ok(!posterOverlap(a, b) || posterOverlap(a, b).overlap < 1);
+});
+
+test('new posters collide with page surfaces on their first frame', () => {
+  const poster = createPoster({ x: 400, y: 300, size: 60, vy: 120 });
+  const surface = { left: 300, right: 500, top: 330, bottom: 350, previousTop: 330, vx: 0, vy: 0 };
+  const result = stepPosters([poster], { dt: 1 / 60, bounds, obstacles: [surface], gravity: 0 });
+  assert.ok(result.impacts > 0);
+  assert.ok(poster.y + posterExtents(poster).y <= surface.top + .5);
+  assert.ok(poster.vy <= 0);
+});
+
+test('launch collisions follow the visible size as posters grow', () => {
+  const a = createPoster({ x: 300, y: 250, size: 60, scale: .2 });
+  const b = createPoster({ x: 325, y: 250, size: 60, scale: .2 });
+  assert.equal(posterOverlap(a, b), null, 'small cards should not collide as full-size rectangles');
+  assert.equal(posterExtents(a).x, 6);
+  stepPosters([a, b], { dt: 1 / 60, bounds, gravity: 0 });
+  assert.equal(a.x, 300);
+  assert.equal(b.x, 325);
+  advance([a, b], .15, { gravity: 0 });
+  assert.equal(a.scale, 1);
+  assert.equal(b.scale, 1);
+  assert.ok(b.x - a.x > 59, 'growing cards should separate before the former collision delay');
 });
 
 test('separating axes distinguish rotated posters from overlapping bounding boxes', () => {

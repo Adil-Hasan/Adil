@@ -1,15 +1,15 @@
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
-export function createPoster({ x, y, size, vx = 0, vy = 0, angle = 0, spin = 0 }) {
+export function createPoster({ x, y, size, vx = 0, vy = 0, angle = 0, spin = 0, scale = 1 }) {
   return { x, y, vx, vy, angle, spin, halfWidth: size / 2, halfHeight: size * .625,
-    age: 0, quiet: 0, asleep: false, touching: false, mode: 'loose', scale: .2, opacity: 1 };
+    age: 0, quiet: 0, asleep: false, touching: false, mode: 'loose', scale, initialScale: scale, opacity: 1 };
 }
 
 export function posterExtents(poster) {
   const cosine = Math.abs(Math.cos(poster.angle));
   const sine = Math.abs(Math.sin(poster.angle));
-  return { x: cosine * poster.halfWidth + sine * poster.halfHeight,
-    y: sine * poster.halfWidth + cosine * poster.halfHeight };
+  return { x: (cosine * poster.halfWidth + sine * poster.halfHeight) * poster.scale,
+    y: (sine * poster.halfWidth + cosine * poster.halfHeight) * poster.scale };
 }
 
 export function posterOverlap(a, b) {
@@ -18,8 +18,8 @@ export function posterOverlap(a, b) {
   for (const angle of [a.angle, a.angle + Math.PI / 2, b.angle, b.angle + Math.PI / 2]) {
     const x = Math.cos(angle);
     const y = Math.sin(angle);
-    const radius = (poster) => poster.halfWidth * Math.abs(Math.cos(poster.angle - angle))
-      + poster.halfHeight * Math.abs(Math.sin(poster.angle - angle));
+    const radius = (poster) => (poster.halfWidth * Math.abs(Math.cos(poster.angle - angle))
+      + poster.halfHeight * Math.abs(Math.sin(poster.angle - angle))) * poster.scale;
     const separation = (a.x - b.x) * x + (a.y - b.y) * y;
     const penetration = radius(a) + radius(b) - Math.abs(separation);
     if (penetration <= 0) return null;
@@ -103,7 +103,7 @@ function collidePosters(posters) {
   const cellSize = 160;
   for (let index = 0; index < posters.length; index++) {
     const poster = posters[index];
-    if (!['loose', 'dragging'].includes(poster.mode) || poster.age < .25) continue;
+    if (!['loose', 'dragging'].includes(poster.mode)) continue;
     const cellX = Math.floor(poster.x / cellSize);
     const cellY = Math.floor(poster.y / cellSize);
     for (let x = cellX - 1; x <= cellX + 1; x++) {
@@ -176,7 +176,10 @@ export function stepPosters(posters, { dt, bounds, obstacles = [], vacuum = null
       if (Math.hypot(poster.x - vacuum.x, poster.y - vacuum.y) < 6 || poster.captureTime >= .42) poster.mode = 'removed';
       continue;
     }
-    poster.scale = Math.min(1, .2 + poster.age * 7);
+    // Grow the visible card and its collision shape together, with no timed handoff.
+    const growth = Math.min(1, poster.age / .12);
+    const easedGrowth = growth * growth * (3 - 2 * growth);
+    poster.scale = poster.initialScale + (1 - poster.initialScale) * easedGrowth;
     poster.opacity = 1;
     poster.touching = false;
     poster.previousY = poster.y;
@@ -195,7 +198,6 @@ export function stepPosters(posters, { dt, bounds, obstacles = [], vacuum = null
     for (const poster of posters) {
       if (poster.mode !== 'loose') continue;
       containPoster(poster, bounds, dt / 4);
-      if (poster.age < .3) continue;
       for (const surface of obstacles) {
         if (collideWithSurface(poster, surface, dt / 4, bounds)) impacts++;
       }

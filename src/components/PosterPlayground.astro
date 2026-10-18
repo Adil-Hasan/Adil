@@ -1,0 +1,65 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<div class="design-burst" aria-hidden="true"></div>
+<aside class="cleanup-chat" aria-label="Screen cleanup" hidden>
+  <div class="cleanup-head">
+    <span class="cleanup-avatar"><img src={`${base}Adil-assets/image.png`} alt="" loading="lazy" decoding="async" /></span>
+    <button class="cleanup-close" type="button" aria-label="Dismiss message" title="Dismiss message">
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+    </button>
+  </div>
+  <p id="cleanup-message" role="status"></p>
+  <div class="cleanup-actions">
+    <button class="cleanup-button" type="button" aria-label="Clean" aria-describedby="vacuum-instructions" aria-pressed="false">
+      <span class="cleanup-button-label">Clean</span>
+      <svg class="cleanup-button-icon" viewBox="0 0 64 72" fill="none" aria-hidden="true" focusable="false">
+        <path d="M8 10 28 32C38 42 23 57 36 58" stroke="#161b18" stroke-width="9" stroke-linecap="round" />
+        <path d="M8 10 28 32C38 42 23 57 36 58" stroke="#a6b8a0" stroke-width="5" stroke-linecap="round" />
+        <path d="m1 4 10-3 5 9-8 6Z" fill="#e7e8bb" stroke="#28382b" stroke-width="1.5" />
+        <rect x="33" y="37" width="26" height="28" rx="10" fill="#d7dfc3" stroke="#28382b" stroke-width="1.5" />
+        <path d="M39 38V33H51V38" stroke="#d7dfc3" stroke-width="3" stroke-linecap="round" />
+        <path d="M37 49H55M37 53H55M37 57H55" stroke="#90a281" stroke-width="1.5" />
+        <circle cx="39" cy="65" r="4" fill="#28382b" stroke="#d7dfc3" />
+        <circle cx="54" cy="65" r="4" fill="#28382b" stroke="#d7dfc3" />
+        <circle cx="51" cy="43" r="2" fill="#6d8958" />
+      </svg>
+    </button>
+  </div>
+  <span class="sr-only" id="vacuum-instructions">Move or drag near posters to vacuum them. You can also use the arrow keys. Press Escape to put the vacuum away.</span>
+</aside>
+<div class="vacuum-field" aria-hidden="true" hidden></div>
+<div class="vacuum-cursor" aria-hidden="true" hidden>
+  <svg viewBox="0 0 64 72" fill="none">
+    <g class="vacuum-wind" stroke="#e7e8bb" stroke-width="1.5" stroke-linecap="round">
+      <path d="M-7 1 0 5M-9 8H0M-7 15 0 11" />
+    </g>
+    <path d="M8 10 28 32C38 42 23 57 36 58" stroke="#161b18" stroke-width="9" stroke-linecap="round" />
+    <path d="M8 10 28 32C38 42 23 57 36 58" stroke="#a6b8a0" stroke-width="5" stroke-linecap="round" />
+    <path d="m1 4 10-3 5 9-8 6Z" fill="#e7e8bb" stroke="#28382b" stroke-width="1.5" />
+    <rect x="33" y="37" width="26" height="28" rx="10" fill="#d7dfc3" stroke="#28382b" stroke-width="1.5" />
+    <path d="M39 38V33H51V38" stroke="#d7dfc3" stroke-width="3" stroke-linecap="round" />
+    <path d="M37 49H55M37 53H55M37 57H55" stroke="#90a281" stroke-width="1.5" />
+    <circle cx="39" cy="65" r="4" fill="#28382b" stroke="#d7dfc3" />
+    <circle cx="54" cy="65" r="4" fill="#28382b" stroke="#d7dfc3" />
+    <circle cx="51" cy="43" r="2" fill="#6d8958" />
+  </svg>
+</div>
+<section class="screen-crash" role="dialog" aria-modal="true" aria-labelledby="crash-title" aria-describedby="crash-description" hidden>
+  <div class="crash-content">
+    <div class="crash-symbol" aria-hidden="true">:(</div>
+    <h2 id="crash-title"></h2>
+    <p id="crash-description"></p>
+    <div class="crash-actions">
+      <div class="crash-controls">
+        <p class="crash-code">TOO_MANY_POSTERS</p>
+        <button class="crash-reload" type="button">Reload page</button>
+      </div>
+    </div>
+    <p class="crash-brand">What is wrong with you? - Adil</p>
+    <button class="crash-qr" type="button" aria-label="Open error details" title="Error details">
+      <img src={`${base}error-details.svg`} alt="Scan for error details" width="132" height="132" />
+    </button>
+  </div>
+</section>

@@ -112,12 +112,13 @@ function showCrash() {
   crashReload.focus({ preventScroll: true });
 }
 
-function updatePile(pile = floorPile(posters, innerHeight - 3), forceCoverage = false) {
+function updatePile(pile = floorPile(posters, innerHeight - 3), forceCoverage = false,
+  buttonRect = burstButton.getBoundingClientRect()) {
   if (crashed) return;
   const baseBottom = innerWidth <= 600 ? 18 : 28;
   const right = innerWidth - (innerWidth <= 600 ? 16 : 24);
   const bottom = cleanupBottom({ pile, left: right - chatWidth, right, height: innerHeight,
-    bubbleHeight: chatHeight, baseBottom, topInset: headerInset, avoidRect: burstButton.getBoundingClientRect() });
+    bubbleHeight: chatHeight, baseBottom, topInset: headerInset, avoidRect: buttonRect });
   if (!pointerOnChat && !focusOnChat && !chatClosing && Math.abs(bottom - chatBottom) > 1) {
     chatBottom = bottom;
     chat.style.setProperty('--chat-bottom', `${bottom}px`);
@@ -287,7 +288,7 @@ function simulate(now) {
   const sucking = posters.some(poster => poster.mode === 'sucking');
   cursor.classList.toggle('is-sucking', sucking);
   field.classList.toggle('is-sucking', sucking);
-  updatePile(undefined, !result.moving);
+  updatePile(undefined, !result.moving, buttonRect);
   if ((result.moving || removed) && posters.length) requestFrame();
   else lastTime = 0;
 }
@@ -305,7 +306,6 @@ function createCard(size) {
     part.textContent = text;
     card.append(part);
   }
-  layer.append(card);
   return card;
 }
 
@@ -337,33 +337,44 @@ function burstStars(x, y, scale) {
   }
 }
 
-export function burstDesigns(x, y) {
+export function burstDesigns(x, y, buttonRect = burstButton.getBoundingClientRect()) {
   if (!canBurstDesigns()) return;
   presses++;
   if (presses >= WARNING_PRESS) { dismissedStage = null; clearPickupNotice(); }
   if (presses >= FIRST_CHAT_PRESS) recoveryNotice = false;
   const scale = Math.max(.55, Math.min(innerWidth / 1000, 1.2));
   vacuum.radius = Math.max(75, 110 * scale);
+  const cards = document.createDocumentFragment();
   for (let index = 0; index < 12; index++) {
     const size = (48 + Math.random() * 24) * scale;
-    const angle = Math.PI * 2 * index / 12 + (Math.random() - .5) * .5;
+    const launchAngle = Math.PI * 2 * index / 12;
+    const angle = launchAngle + (Math.random() - .5) * .5;
     const speed = (180 + Math.random() * 260) * scale;
+    // A small ring gives each growing card room to launch without collision immunity.
+    const launchRadius = 48 * scale;
     const poster = createPoster({
-      x: motion.matches ? (index + .5) * innerWidth / 12 : x,
-      y: motion.matches ? innerHeight - size : y,
+      x: motion.matches ? (index + .5) * innerWidth / 12 : x + Math.cos(launchAngle) * launchRadius,
+      y: motion.matches ? innerHeight - size : y + Math.sin(launchAngle) * launchRadius,
       size, vx: motion.matches ? 0 : Math.cos(angle) * speed,
       vy: motion.matches ? 0 : Math.sin(angle) * speed - 210 * scale,
       angle: (Math.random() - .5) * 1.2,
       spin: motion.matches ? 0 : (Math.random() - .5) * 5,
+      scale: motion.matches ? 1 : .2,
     });
     poster.element = createCard(size);
+    poster.element.style.transform = `translate(${poster.x}px, ${poster.y}px) translate(-50%, -50%) rotate(${poster.angle}rad) scale(${poster.scale})`;
+    poster.element.classList.add('is-over-button');
+    cards.append(poster.element);
     enableDragging(poster);
     posters.push(poster);
   }
+  layer.append(cards);
   burstStars(x, y, scale);
   updateChat();
-  updatePile();
-  wakePosters();
+  // Reuse the pre-insertion measurement instead of forcing layout for new particles.
+  updatePile(undefined, false, buttonRect);
+  // New posters are awake; collisions will wake any settled posters they hit.
+  requestFrame();
 }
 
 function releasePoster(poster, cancelled = false) {

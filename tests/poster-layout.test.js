@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createPoster } from '../poster-physics.js';
-import { chatStage, floorPile, cleanupBottom, screenCoverage, crashPlatform } from '../poster-layout.js';
+import { createPoster } from '../src/scripts/poster-physics.js';
+import { chatStage, floorPile, cleanupBottom, screenCoverage, crashPlatform } from '../src/scripts/poster-layout.js';
 
 function restingPoster(x, y) {
   const poster = createPoster({ x, y, size: 60 });

@@ -4,10 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node server.mjs",
-    "start": "node server.mjs",
-    "build": "node build.mjs",
-    "check": "node --check app.js && node --check poster-playground.js && node --check poster-physics.js && node --check poster-layout.js && node --check project-gallery.js && node --check career-flow.js && node --check server.mjs && node --check build.mjs",
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "node scripts/validate-projects.mjs && astro build",
+    "preview": "astro preview",
+    "check": "node --check src/scripts/app.js && node --check src/scripts/poster-playground.js && node --check src/scripts/poster-physics.js && node --check src/scripts/poster-layout.js && node --check src/scripts/project-gallery.js && node --check src/scripts/career-flow.js && node --check astro.config.mjs && node --check scripts/validate-projects.mjs && node scripts/validate-projects.mjs",
     "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "dependencies": {
+    "astro": "7.4.0"
   }
 }
