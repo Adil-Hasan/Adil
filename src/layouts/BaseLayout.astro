@@ -1,9 +1,10 @@
 ---
 import '../styles/global.css';
+import site from '../../public/site.json';
 
 const {
-  title = 'Adil Hasan',
-  description = 'Adil Hasan. Why fight with a template everyday when you can just press a button?',
+  title = site.title,
+  description = site.description,
 } = Astro.props;
 ---
 
@@ -15,7 +16,7 @@ const {
     <meta name="theme-color" content="#141414" />
     <meta name="description" content={description} />
     <title>{title}</title>
-    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}${site.favicon.replace(/^\.?\//, '')}`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;700;900&display=swap" rel="stylesheet" />

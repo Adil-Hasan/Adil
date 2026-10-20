@@ -1,36 +1,66 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createPoster } from '../src/scripts/poster-physics.js';
-import { chatStage, floorPile, cleanupBottom, screenCoverage, crashPlatform } from '../src/scripts/poster-layout.js';
+import { chatStage, cleanComboMessage, screenCoverage, crashPlatform } from '../src/scripts/poster-layout.js';
+import { cleanupAppearance } from '../src/scripts/cleanup-appearance.js';
+import { readFileSync } from 'node:fs';
 
-function restingPoster(x, y) {
-  const poster = createPoster({ x, y, size: 60 });
-  poster.age = 3;
-  poster.asleep = true;
-  return poster;
-}
-
-test('the first chat waits for seven accepted presses and the warning waits for five more', () => {
+test('the cleanup prompt starts after the configured number of presses', () => {
   assert.equal(chatStage({ presses: 6, posterCount: 72 }), 'hidden');
   assert.equal(chatStage({ presses: 7, posterCount: 84 }), 'dirty');
-  assert.equal(chatStage({ presses: 11, posterCount: 132 }), 'dirty');
-  assert.equal(chatStage({ presses: 12, posterCount: 144 }), 'warning');
-  assert.equal(chatStage({ presses: 20, posterCount: 240 }), 'warning');
+  assert.equal(chatStage({ presses: 20, posterCount: 240 }), 'dirty');
+  assert.equal(chatStage({ presses: 2, posterCount: 24, threshold: 3 }), 'hidden');
+  assert.equal(chatStage({ presses: 3, posterCount: 36, threshold: 3 }), 'dirty');
 });
 
-test('cleaning and crash recovery have their own chat messages', () => {
-  assert.equal(chatStage({ presses: 12, posterCount: 0, gift: true }), 'gift');
+test('vacuum-button combos advance through ten entries then keep showing Cleaning GOD', () => {
+  const messages = ['InstaClean', 'DoubleClean!', 'TrippleClean!!!', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  assert.equal(cleanComboMessage(1, messages), 'InstaClean');
+  assert.equal(cleanComboMessage(2, messages), 'DoubleClean!');
+  assert.equal(cleanComboMessage(3, messages), 'TrippleClean!!!');
+  for (let click = 1; click <= 10; click++) assert.equal(cleanComboMessage(click, messages, 'Cleaning GOD!'), messages[click - 1]);
+  assert.equal(cleanComboMessage(10, messages), 'ten');
+  for (const click of [11, 12, 20, 100]) assert.equal(cleanComboMessage(click, messages, 'Cleaning GOD!'), 'Cleaning GOD!');
+  assert.equal(cleanComboMessage(0, messages), null);
+  assert.equal(cleanComboMessage(1, []), null);
+});
+
+test('each cleanup phase and combo level selects its configured typography', () => {
+  const { messageStyles } = JSON.parse(readFileSync(new URL('../public/posters.json', import.meta.url), 'utf8'));
+  for (const stage of ['dirty', 'cleaning', 'completed', 'thanks', 'recovered']) {
+    assert.deepEqual(cleanupAppearance(stage, 0, messageStyles), messageStyles[stage]);
+  }
+  assert.equal(new Set(Object.values(messageStyles).filter(style => !Array.isArray(style)).map(style => `${style.color}:${style.font}`)).size, 6);
+  for (let count = 1; count <= 10; count++) assert.deepEqual(cleanupAppearance('combo', count, messageStyles), messageStyles.cleanCombos[count - 1]);
+  for (const count of [11, 12, 100]) assert.deepEqual(cleanupAppearance('combo', count, messageStyles), messageStyles.cleaningGod);
+});
+
+test('the complete cleanup sequence waits for the cleaner to be returned before saying thanks', () => {
+  assert.equal(chatStage({ presses: 7, posterCount: 84 }), 'dirty');
+  assert.equal(chatStage({ presses: 7, posterCount: 84, vacuumActive: true }), 'cleaning');
+  assert.equal(chatStage({ presses: 7, posterCount: 1, vacuumActive: true }), 'cleaning');
+  assert.equal(chatStage({ presses: 0, posterCount: 0, vacuumActive: true, cleaned: true }), 'completed');
+  assert.equal(chatStage({ presses: 0, posterCount: 0, cleaned: true }), 'thanks');
   assert.equal(chatStage({ presses: 0, posterCount: 0 }), 'hidden');
+});
+
+test('putting the cleaner away early returns to the prompt, and picking it up resumes encouragement', () => {
+  const state = { presses: 7, posterCount: 20 };
+  assert.equal(chatStage({ ...state, vacuumActive: true }), 'cleaning');
+  assert.equal(chatStage(state), 'dirty');
+  assert.equal(chatStage({ ...state, vacuumActive: true }), 'cleaning');
+});
+
+test('new posters interrupt completion and active cleaning always keeps its encouragement', () => {
+  assert.equal(chatStage({ presses: 1, posterCount: 12, cleaned: true, vacuumActive: true }), 'cleaning');
+  assert.equal(chatStage({ presses: 7, posterCount: 84, cleaned: true }), 'dirty');
+  assert.equal(chatStage({ presses: 0, posterCount: 0 }), 'hidden');
+});
+
+test('crash recovery remains separate from the cleanup cycle', () => {
   assert.equal(chatStage({ presses: 0, posterCount: 0, recovered: true }), 'recovered');
   assert.equal(chatStage({ presses: 7, posterCount: 84, recovered: true }), 'dirty');
-});
-
-test('picking up the vacuum adds a reaction without revealing the chat before press seven', () => {
-  assert.equal(chatStage({ presses: 6, posterCount: 72, pickup: true }), 'hidden');
-  assert.equal(chatStage({ presses: 7, posterCount: 84, pickup: true }), 'pickup');
-  assert.equal(chatStage({ presses: 12, posterCount: 144, pickup: true }), 'pickup');
-  assert.equal(chatStage({ presses: 0, posterCount: 0, gift: true, pickup: true }), 'pickup');
-  assert.equal(chatStage({ presses: 0, posterCount: 0, recovered: true, pickup: true }), 'recovered');
+  assert.equal(chatStage({ presses: 7, posterCount: 2, recovered: true, vacuumActive: true }), 'cleaning');
 });
 
 test('screen coverage counts visible paper once rather than counting stacked duplicates', () => {
@@ -56,45 +86,4 @@ test('crash style follows the device rather than viewport width', () => {
   assert.equal(crashPlatform({ platform: 'Linux x86_64', userAgent: 'X11; CrOS x86_64' }), 'chromeos');
   assert.equal(crashPlatform({ platform: 'Linux x86_64' }), 'linux');
   assert.equal(crashPlatform({ platform: '' }), 'browser');
-});
-
-test('the bubble clears a connected pile without following airborne posters', () => {
-  const pile = floorPile([restingPoster(550, 562.5), restingPoster(550, 487.5), restingPoster(550, 200)], 600);
-  assert.equal(pile.length, 2);
-  const bottom = cleanupBottom({ pile, left: 500, right: 780, height: 600, bubbleHeight: 130, baseBottom: 28 });
-  assert.equal(bottom, 170);
-  assert.ok(600 - bottom < Math.min(...pile.map(rect => rect.top)));
-});
-
-test('piles on the other side of the screen do not move the bubble', () => {
-  const pile = floorPile([restingPoster(100, 562.5), restingPoster(100, 487.5)], 600);
-  assert.equal(cleanupBottom({ pile, left: 500, right: 780, height: 600, bubbleHeight: 130, baseBottom: 28 }), 28);
-});
-
-test('bouncing posters do not count as a settled pile', () => {
-  const bouncing = restingPoster(550, 562.5);
-  bouncing.asleep = false;
-  bouncing.touching = true;
-  bouncing.vy = -300;
-  assert.equal(floorPile([bouncing], 600).length, 0);
-});
-
-test('a deep pile keeps the bubble above cards that are still settling', () => {
-  const posters = [restingPoster(550, 562.5), restingPoster(550, 487.5), restingPoster(550, 412.5)];
-  for (const poster of posters) { poster.asleep = false; poster.touching = true; poster.vy = 80; }
-  const pile = floorPile(posters, 600);
-  assert.equal(pile.length, 3);
-  assert.equal(cleanupBottom({ pile, left: 500, right: 780, height: 600, bubbleHeight: 130, baseBottom: 28 }), 245);
-});
-
-test('a deep pile cannot push the bubble beyond the top of the screen', () => {
-  assert.equal(cleanupBottom({ pile: [{ left: 500, right: 780, top: 0, bottom: 600 }],
-    left: 500, right: 780, height: 600, bubbleHeight: 130, baseBottom: 28, topInset: 90 }), 380);
-});
-
-test('the rising bubble leaves the burst button visible and reachable', () => {
-  const bottom = cleanupBottom({ pile: [{ left: 124, right: 374, top: 550, bottom: 844 }],
-    left: 124, right: 374, height: 844, bubbleHeight: 109, baseBottom: 18,
-    avoidRect: { left: 140, right: 240, top: 430, bottom: 470 } });
-  assert.ok(844 - bottom <= 410);
 });

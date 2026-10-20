@@ -1,5 +1,8 @@
 import { createPoster, posterExtents, stepPosters } from './poster-physics.js';
-import { chatStage, FIRST_CHAT_PRESS, WARNING_PRESS, cleanupBottom, floorPile, screenCoverage, crashPlatform } from './poster-layout.js';
+import { chatStage, cleanComboMessage, screenCoverage, crashPlatform } from './poster-layout.js';
+import posterContent from '../../public/posters.json';
+import { collectPosterColliders } from './poster-colliders.js';
+import { cleanupAppearance, MESSAGE_FONTS } from './cleanup-appearance.js';
 
 const layer = document.querySelector('.design-burst');
 const chat = document.querySelector('.cleanup-chat');
@@ -14,21 +17,14 @@ const crashQr = document.querySelector('.crash-qr');
 const cursor = document.querySelector('.vacuum-cursor');
 const field = document.querySelector('.vacuum-field');
 const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const designs = [
-  { kind: 'type', symbol: 'Aa', caption: 'TYPE / STUDY' },
-  { kind: 'grid', symbol: '01', caption: 'FORM / SYSTEM' },
-  { kind: 'orbit', symbol: '*', caption: 'IN MOTION' },
-  { kind: 'frames', symbol: 'FG', caption: 'FRAME / GENERATE' },
-  { kind: 'editorial', symbol: 'Make\nit.', caption: 'NEW IDEAS' },
-  { kind: 'shape', symbol: '+', caption: 'PLAY / REPEAT' },
-];
+const { designs, settings: burstSettings } = posterContent;
 const stars = new Set();
 const vacuum = { active: false, inside: false, x: 0, y: 0, radius: 110 };
 const previousSurfaces = new Map();
 let posters = [];
 let frame = 0;
 let lastTime = 0;
-let gift = false;
+let cleaned = false;
 let colliderElements = [];
 let refreshColliders = true;
 let lastWidth = innerWidth;
@@ -39,19 +35,15 @@ let lastCoverageCheck = 0;
 let currentStage = 'hidden';
 let chatBaseStage = 'hidden';
 let dismissedStage = null;
-let pickupNotice = false;
-let pickupTimer = 0;
+let thanksTimer = 0;
+let cleanComboCount = 0;
+let comboMessage = null;
+let comboTimer = 0;
 const crashStorageKey = 'adil:poster-crash';
 let recoveryNotice = consumeCrashNotice();
 let popupAnimation;
 let closeAnimation;
 let chatClosing = false;
-let chatWidth = innerWidth <= 600 ? 250 : 280;
-let chatHeight = 130;
-let chatBottom = 0;
-let headerInset = 16;
-let pointerOnChat = false;
-let focusOnChat = false;
 
 function popChat(appearing = false) {
   cancelChatClose();
@@ -78,7 +70,8 @@ export function canBurstDesigns() { return !crashed; }
 function showCrash() {
   if (crashed) return;
   crashed = true;
-  clearPickupNotice();
+  clearThanksTimer();
+  clearCleanCombo(true);
   cancelChatClose();
   try { sessionStorage.setItem(crashStorageKey, '1'); } catch { /* Storage can be disabled in a private session. */ }
   for (const poster of posters) releasePoster(poster, true);
@@ -94,99 +87,101 @@ function showCrash() {
   chat.inert = true;
   const platform = crashPlatform({ platform: navigator.userAgentData?.platform || navigator.platform,
     userAgent: navigator.userAgent, maxTouchPoints: navigator.maxTouchPoints });
-  const content = {
-    windows: { symbol: ':(', title: 'Your screen ran into a problem.' },
-    mac: { symbol: '\u23fb', title: 'Your screen stopped because of a problem.' },
-    ios: { symbol: '\u23fb', title: 'Too many posters.' },
-    android: { symbol: '!', title: 'Poster UI isn\'t responding' },
-    linux: { symbol: '[!]', title: 'Kernel panic: too many posters' },
-    chromeos: { symbol: ':(', title: 'Something went wrong.' },
-    browser: { symbol: ':(', title: 'This page has stopped responding.' },
-  }[platform];
+  const content = posterContent.crash.platforms[platform];
   crashScreen.dataset.platform = platform;
   document.querySelector('.crash-symbol').textContent = content.symbol;
   document.querySelector('#crash-title').textContent = content.title;
-  document.querySelector('#crash-description').textContent = 'You are not seeing sh#t with those around.';
+  document.querySelector('#crash-description').textContent = posterContent.crash.description;
   crashScreen.hidden = false;
   window.dispatchEvent(new Event('poster-crash'));
   crashReload.focus({ preventScroll: true });
 }
 
-function updatePile(pile = floorPile(posters, innerHeight - 3), forceCoverage = false,
-  buttonRect = burstButton.getBoundingClientRect()) {
+function checkCoverage(forceCoverage = false) {
   if (crashed) return;
-  const baseBottom = innerWidth <= 600 ? 18 : 28;
-  const right = innerWidth - (innerWidth <= 600 ? 16 : 24);
-  const bottom = cleanupBottom({ pile, left: right - chatWidth, right, height: innerHeight,
-    bubbleHeight: chatHeight, baseBottom, topInset: headerInset, avoidRect: buttonRect });
-  if (!pointerOnChat && !focusOnChat && !chatClosing && Math.abs(bottom - chatBottom) > 1) {
-    chatBottom = bottom;
-    chat.style.setProperty('--chat-bottom', `${bottom}px`);
-  }
   const now = performance.now();
-  if (presses >= WARNING_PRESS && (forceCoverage || now - lastCoverageCheck > 200)) {
+  if (presses >= burstSettings.cleanupAfterClicks + 5 && (forceCoverage || now - lastCoverageCheck > 200)) {
     lastCoverageCheck = now;
     if (screenCoverage(posters, { width: innerWidth, height: innerHeight }) >= .72) showCrash();
   }
 }
 
-function holdChatPosition(holding) {
-  if (holding && !chat.classList.contains('is-interacting')) {
-    chatBottom = Number.parseFloat(getComputedStyle(chat).bottom);
-    chat.style.setProperty('--chat-bottom', `${chatBottom}px`);
-  }
-  chat.classList.toggle('is-interacting', holding);
-  if (!holding) updatePile();
-}
-
-function updateChat() {
+function updateChat(comboClick = false) {
   const wasHidden = chat.hidden;
   const wasClosing = chatClosing;
   const previousStage = currentStage;
-  const state = { presses, posterCount: posters.length, gift, recovered: recoveryNotice };
+  const state = { presses, posterCount: posters.length, vacuumActive: vacuum.active, cleaned, recovered: recoveryNotice, threshold: burstSettings.cleanupAfterClicks };
   const nextBaseStage = chatStage(state);
   if (nextBaseStage !== chatBaseStage) dismissedStage = null;
   chatBaseStage = nextBaseStage;
-  currentStage = chatStage({ ...state, pickup: pickupNotice });
+  currentStage = vacuum.active && comboMessage ? 'combo' : nextBaseStage;
   const shouldHide = crashed || currentStage === 'hidden' || dismissedStage === chatBaseStage;
   if (!shouldHide && chatClosing) cancelChatClose();
   chat.hidden = shouldHide && !chatClosing;
-  const text = currentStage === 'pickup' ? 'Oooh, nice.' : currentStage === 'recovered' ? 'Don\'t do it again.' : currentStage === 'warning' ? 'Please! Stop! Clean up!'
-    : currentStage === 'gift' ? 'Thanks! Keep the vaccum cleaner as a gift.' : 'Great, you trashed the screen, now clean it.';
-  if (message.textContent !== text) message.textContent = text;
-  const action = currentStage === 'recovered' ? 'Okay' : vacuum.active ? 'Put away' : posters.length ? 'Clean' : 'Use gift';
+  if (currentStage === 'hidden') return;
+  const text = currentStage === 'combo' ? comboMessage : posterContent.messages[currentStage] ?? posterContent.messages.dirty;
+  const messageChanged = message.textContent !== text;
+  if (messageChanged) message.textContent = text;
+  const appearance = cleanupAppearance(currentStage, cleanComboCount, posterContent.messageStyles);
+  chat.dataset.box = appearance.box;
+  chat.style.setProperty('--box-paper', appearance.paper);
+  chat.style.setProperty('--box-accent', appearance.accent);
+  message.style.setProperty('--message-color', appearance.color);
+  message.style.setProperty('--message-font', MESSAGE_FONTS[appearance.font]);
+  message.style.setProperty('--message-size', `${appearance.size}px`);
+  message.style.setProperty('--message-weight', String(appearance.weight));
+  message.style.setProperty('--message-style', appearance.italic ? 'italic' : 'normal');
+  const action = posterContent.actions[vacuum.active ? 'putAway' : 'clean'];
   cleanButtonLabel.textContent = action;
   cleanButton.setAttribute('aria-label', action);
   cleanButton.title = action;
-  cleanButton.hidden = currentStage === 'recovered';
+  cleanButton.hidden = ['recovered', 'thanks', 'hidden'].includes(currentStage);
   cleanButton.classList.add('is-icon-only');
   cleanButton.setAttribute('aria-pressed', String(vacuum.active));
   if (currentStage === 'recovered') cleanButton.removeAttribute('aria-describedby');
   else cleanButton.setAttribute('aria-describedby', 'vacuum-instructions');
-  chat.classList.toggle('is-clean', currentStage === 'gift' || currentStage === 'pickup');
-  chat.classList.toggle('is-overloaded', currentStage === 'warning');
+  chat.classList.toggle('is-clean', ['cleaning', 'completed', 'thanks', 'combo'].includes(currentStage));
+  chat.classList.remove('is-overloaded');
   chat.dataset.stage = currentStage;
-  if (!shouldHide && (wasHidden || wasClosing || previousStage !== currentStage)) popChat(wasHidden || wasClosing);
+  chat.dataset.comboTier = currentStage === 'combo' ? cleanComboCount > 10 ? 'god' : String(cleanComboCount) : '';
+  if (!shouldHide && (wasHidden || wasClosing || previousStage !== currentStage || (currentStage === 'combo' && (messageChanged || comboClick)))) popChat(wasHidden || wasClosing);
 }
 
-function clearPickupNotice() {
-  clearTimeout(pickupTimer);
-  pickupTimer = 0;
-  pickupNotice = false;
+function clearCleanCombo(resetCount = false) {
+  clearTimeout(comboTimer);
+  comboTimer = 0;
+  comboMessage = null;
+  if (resetCount) cleanComboCount = 0;
 }
 
-function dismissChat() {
+function showCleanCombo() {
+  clearCleanCombo();
+  cleanComboCount = Math.min(cleanComboCount + 1, 11);
+  comboMessage = cleanComboMessage(cleanComboCount, posterContent.messages.cleanCombos, posterContent.messages.cleaningGod);
+  dismissedStage = null;
+  comboTimer = setTimeout(() => {
+    comboTimer = 0;
+    comboMessage = null;
+    updateChat();
+  }, burstSettings.comboDurationMs);
+}
+
+function clearThanksTimer() {
+  clearTimeout(thanksTimer);
+  thanksTimer = 0;
+}
+
+function dismissChat({ restoreFocus = true } = {}) {
   if (chat.hidden || chatClosing) return;
   dismissedStage = chatBaseStage;
-  clearPickupNotice();
+  clearThanksTimer();
+  clearCleanCombo();
   const style = getComputedStyle(chat);
   const from = { opacity: style.opacity, transform: style.transform };
-  holdChatPosition(true);
   popupAnimation?.cancel();
-  pointerOnChat = focusOnChat = false;
   chatClosing = true;
   chat.inert = true;
-  burstButton.focus({ preventScroll: true });
+  if (restoreFocus) burstButton.focus({ preventScroll: true });
   if (motion.matches) {
     chat.hidden = true;
     cancelChatClose();
@@ -207,7 +202,6 @@ function cancelChatClose() {
   closeAnimation = null;
   chatClosing = false;
   chat.inert = false;
-  chat.classList.remove('is-interacting');
 }
 
 function requestFrame() {
@@ -221,28 +215,30 @@ function wakePosters() {
 
 function readSurfaces(dt) {
   if (refreshColliders) {
-    colliderElements = [...document.querySelectorAll('.site-header a, .content-section h2, .folder-front, .folder-preview, .project-image-frame, .career-art')];
+    colliderElements = collectPosterColliders(document);
     previousSurfaces.clear();
     refreshColliders = false;
   }
   const surfaces = [];
-  const headerRect = document.querySelector('.site-header').getBoundingClientRect();
-  headerInset = headerRect.top <= 1 ? headerRect.bottom + 16 : 16;
-  for (const element of colliderElements) {
-    let rect = element.getBoundingClientRect();
-    if (element.matches('h2, .site-header a')) {
-      const text = document.createRange();
-      text.selectNodeContents(element);
-      rect = text.getBoundingClientRect();
-    }
-    if (!rect.width || !rect.height) { previousSurfaces.delete(element); continue; }
-    const previous = previousSurfaces.get(element) || rect;
-    previousSurfaces.set(element, rect);
-    if (rect.bottom < -100 || rect.top > innerHeight + 100 || rect.right < 0 || rect.left > innerWidth) continue;
-    surfaces.push({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom,
-      previousTop: previous.top,
-      vx: Math.max(-1400, Math.min(1400, (rect.left - previous.left) / dt)),
-      vy: Math.max(-1400, Math.min(1400, (rect.top - previous.top) / dt)) });
+  for (const { element, range } of colliderElements) {
+    const rects = (range ? [...range.getClientRects()] : [element.getBoundingClientRect()])
+      .filter(rect => rect.width && rect.height);
+    const key = range || element;
+    const previousRects = previousSurfaces.get(key) || [];
+    previousSurfaces.set(key, rects);
+    const repel = element.classList.contains('button-face');
+    const launchThrough = Boolean(element.closest('.hero-quote'));
+    const animated = element.matches('.career-sticker img, .burst-star') && !motion.matches;
+    rects.forEach((rect, index) => {
+      if (rect.bottom < -100 || rect.top > innerHeight + 100 || rect.right < 0 || rect.left > innerWidth) return;
+      const previous = previousRects[index] || rect;
+      const padding = repel ? 6 : 0;
+      surfaces.push({ left: rect.left - padding, right: rect.right + padding,
+        top: rect.top - padding, bottom: rect.bottom + padding, repel, launchThrough, animated,
+        previousTop: previous.top - padding,
+        vx: Math.max(-1400, Math.min(1400, (rect.left - previous.left) / dt)),
+        vy: Math.max(-1400, Math.min(1400, (rect.top - previous.top) / dt)) });
+    });
   }
   return surfaces;
 }
@@ -251,7 +247,7 @@ function positionVacuum() {
   const visible = vacuum.active && vacuum.inside;
   cursor.hidden = field.hidden = !visible;
   if (!visible) return;
-  cursor.style.transform = `translate(${vacuum.x - 8}px, ${vacuum.y - 8}px)`;
+  cursor.style.transform = `translate(${vacuum.x - 8}px, ${vacuum.y - 43}px)`;
   field.style.transform = `translate(${vacuum.x}px, ${vacuum.y}px) translate(-50%, -50%)`;
   field.style.width = field.style.height = `${vacuum.radius * 2}px`;
 }
@@ -282,14 +278,15 @@ function simulate(now) {
   if (removed) {
     posters = remaining;
     for (const poster of posters) { poster.asleep = false; poster.quiet = 0; }
-    if (!posters.length) { gift = true; presses = 0; clearPickupNotice(); }
+    if (!posters.length) { cleaned = true; presses = 0; clearThanksTimer(); }
     updateChat();
   }
   const sucking = posters.some(poster => poster.mode === 'sucking');
   cursor.classList.toggle('is-sucking', sucking);
   field.classList.toggle('is-sucking', sucking);
-  updatePile(undefined, !result.moving, buttonRect);
-  if ((result.moving || removed) && posters.length) requestFrame();
+  checkCoverage(!result.moving);
+  // A floating sticker can touch a settled poster, so keep checking while visible.
+  if ((result.moving || removed || surfaces.some(surface => surface.animated)) && posters.length) requestFrame();
   else lastTime = 0;
 }
 
@@ -298,6 +295,19 @@ function createCard(size) {
   const card = document.createElement('span');
   card.className = `burst-particle burst-card burst-card--${design.kind}`;
   card.style.setProperty('--card-size', `${size}px`);
+  card.style.setProperty('--card-paper', design.paper);
+  card.style.setProperty('--card-ink', design.ink);
+  card.style.setProperty('--card-accent', design.accent);
+  card.style.setProperty('--card-symbol', design.symbolColor ?? design.ink);
+  if (design.image) {
+    const image = document.createElement('img');
+    image.className = 'burst-card-image';
+    image.src = `${import.meta.env.BASE_URL}${design.image.src.replace(/^\.?\//, '')}`;
+    image.alt = design.image.alt;
+    image.draggable = false;
+    card.append(image);
+    return card;
+  }
   for (const [className, text] of [
     ['burst-card-graphic', ''], ['burst-card-symbol', design.symbol], ['burst-card-caption', design.caption],
   ]) {
@@ -311,16 +321,16 @@ function createCard(size) {
 
 function burstStars(x, y, scale) {
   if (motion.matches) return;
-  for (let index = 0; index < 18; index++) {
+  for (let index = 0; index < burstSettings.starCount; index++) {
     const star = document.createElement('span');
     star.className = 'burst-particle burst-star';
     const size = (8 + Math.random() * 12) * scale;
     star.style.width = star.style.height = `${size}px`;
     star.style.left = `${x}px`;
     star.style.top = `${y}px`;
-    star.style.setProperty('--star-color', ['#fff3c8', '#dfdfdf', '#c6d9f6'][index % 3]);
+    star.style.setProperty('--star-color', burstSettings.starColors[index % burstSettings.starColors.length]);
     layer.append(star);
-    const angle = Math.PI * 2 * index / 18 + (Math.random() - .5) * .5;
+    const angle = Math.PI * 2 * index / burstSettings.starCount + (Math.random() - .5) * .5;
     const speed = (180 + Math.random() * 260) * scale;
     const duration = 1000 + Math.random() * 400;
     const frames = Array.from({ length: 20 }, (_, step) => {
@@ -337,29 +347,31 @@ function burstStars(x, y, scale) {
   }
 }
 
-export function burstDesigns(x, y, buttonRect = burstButton.getBoundingClientRect()) {
+export function burstDesigns(x, y) {
   if (!canBurstDesigns()) return;
+  clearThanksTimer();
+  cleaned = false;
   presses++;
-  if (presses >= WARNING_PRESS) { dismissedStage = null; clearPickupNotice(); }
-  if (presses >= FIRST_CHAT_PRESS) recoveryNotice = false;
+  if (presses >= burstSettings.cleanupAfterClicks) { dismissedStage = null; recoveryNotice = false; }
   const scale = Math.max(.55, Math.min(innerWidth / 1000, 1.2));
   vacuum.radius = Math.max(75, 110 * scale);
   const cards = document.createDocumentFragment();
-  for (let index = 0; index < 12; index++) {
-    const size = (48 + Math.random() * 24) * scale;
-    const launchAngle = Math.PI * 2 * index / 12;
+  for (let index = 0; index < burstSettings.postersPerClick; index++) {
+    const size = (burstSettings.minSize + Math.random() * (burstSettings.maxSize - burstSettings.minSize)) * scale;
+    const launchAngle = Math.PI * 2 * index / burstSettings.postersPerClick;
     const angle = launchAngle + (Math.random() - .5) * .5;
-    const speed = (180 + Math.random() * 260) * scale;
+    const speed = (burstSettings.minLaunchSpeed + Math.random() * (burstSettings.maxLaunchSpeed - burstSettings.minLaunchSpeed)) * scale;
     // A small ring gives each growing card room to launch without collision immunity.
-    const launchRadius = 48 * scale;
+    const launchRadius = burstSettings.launchRadius * scale;
     const poster = createPoster({
-      x: motion.matches ? (index + .5) * innerWidth / 12 : x + Math.cos(launchAngle) * launchRadius,
+      x: motion.matches ? (index + .5) * innerWidth / burstSettings.postersPerClick : x + Math.cos(launchAngle) * launchRadius,
       y: motion.matches ? innerHeight - size : y + Math.sin(launchAngle) * launchRadius,
       size, vx: motion.matches ? 0 : Math.cos(angle) * speed,
-      vy: motion.matches ? 0 : Math.sin(angle) * speed - 210 * scale,
+      vy: motion.matches ? 0 : Math.sin(angle) * speed - burstSettings.upwardBoost * scale,
       angle: (Math.random() - .5) * 1.2,
       spin: motion.matches ? 0 : (Math.random() - .5) * 5,
       scale: motion.matches ? 1 : .2,
+      leavingHero: !motion.matches,
     });
     poster.element = createCard(size);
     poster.element.style.transform = `translate(${poster.x}px, ${poster.y}px) translate(-50%, -50%) rotate(${poster.angle}rad) scale(${poster.scale})`;
@@ -370,9 +382,9 @@ export function burstDesigns(x, y, buttonRect = burstButton.getBoundingClientRec
   }
   layer.append(cards);
   burstStars(x, y, scale);
-  updateChat();
-  // Reuse the pre-insertion measurement instead of forcing layout for new particles.
-  updatePile(undefined, false, buttonRect);
+  if (vacuum.active) showCleanCombo();
+  updateChat(vacuum.active);
+  checkCoverage();
   // New posters are awake; collisions will wake any settled posters they hit.
   requestFrame();
 }
@@ -431,9 +443,12 @@ function enableDragging(poster) {
 
 function setVacuum(active) {
   if (crashed) return;
-  if (!active) clearPickupNotice();
+  const returning = vacuum.active && !active;
+  clearThanksTimer();
+  clearCleanCombo(true);
   if (active) for (const poster of posters) releasePoster(poster, true);
   vacuum.active = active;
+  dismissedStage = null;
   document.body.classList.toggle('vacuum-active', active);
   if (active && !vacuum.inside) {
     vacuum.x = innerWidth - 100;
@@ -443,6 +458,15 @@ function setVacuum(active) {
   positionVacuum();
   updateChat();
   wakePosters();
+  if (returning && cleaned && !posters.length) {
+    thanksTimer = setTimeout(() => {
+      thanksTimer = 0;
+      if (!cleaned || vacuum.active || posters.length) return;
+      dismissChat({ restoreFocus: chat.contains(document.activeElement) });
+      cleaned = false;
+      updateChat();
+    }, burstSettings.thanksDurationMs);
+  }
 }
 
 function moveVacuum(event) {
@@ -455,29 +479,13 @@ function moveVacuum(event) {
   requestFrame();
 }
 
-chat.addEventListener('pointerenter', () => { pointerOnChat = true; holdChatPosition(true); });
-chat.addEventListener('pointerleave', () => { pointerOnChat = false; holdChatPosition(focusOnChat); });
-chat.addEventListener('focusin', event => {
-  focusOnChat = event.target.matches(':focus-visible');
-  holdChatPosition(pointerOnChat || focusOnChat);
-});
-chat.addEventListener('focusout', () => {
-  focusOnChat = false;
-  holdChatPosition(pointerOnChat || focusOnChat);
-});
 cleanButton.addEventListener('click', () => {
-  const taking = !vacuum.active;
-  clearPickupNotice();
-  pickupNotice = taking;
-  dismissedStage = null;
-  setVacuum(taking);
-  if (taking) pickupTimer = setTimeout(() => { clearPickupNotice(); updateChat(); }, 2300);
+  setVacuum(!vacuum.active);
 });
 closeChatButton.addEventListener('click', dismissChat);
 crashReload.addEventListener('click', () => location.reload());
 crashQr.addEventListener('click', () => {
-  const encoded = [33, 61, 61, 57, 58, 115, 102, 102, 48, 38, 60, 61, 60, 103, 43, 44, 102, 45, 24, 62, 125, 62, 112, 30, 46, 17, 42, 24, 118, 58, 32, 116, 42, 30, 123, 121, 31, 29, 22, 120, 127, 15, 3, 36, 47, 123, 19, 63];
-  window.open(encoded.map(value => String.fromCharCode(value ^ 73)).join(''), '_blank', 'noopener,noreferrer');
+  window.open(posterContent.crash.errorDetailsUrl, '_blank', 'noopener,noreferrer');
 });
 window.addEventListener('pointermove', moveVacuum, { passive: true });
 window.addEventListener('pointerdown', moveVacuum, { passive: true });
@@ -512,18 +520,13 @@ window.addEventListener('resize', () => {
   vacuum.radius = Math.max(75, 110 * Math.max(.55, Math.min(innerWidth / 1000, 1.2)));
   previousSurfaces.clear();
   positionVacuum();
-  updatePile();
+  checkCoverage(true);
   wakePosters();
 });
-new MutationObserver(() => { refreshColliders = true; wakePosters(); }).observe(document.querySelector('.content-sections'),
-  { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
-document.querySelector('.content-sections').addEventListener('transitionrun', wakePosters);
-new ResizeObserver(() => {
-  if (chat.hidden) return;
-  chatWidth = chat.offsetWidth;
-  chatHeight = chat.offsetHeight;
-  updatePile();
-}).observe(chat);
+new MutationObserver(() => { refreshColliders = true; wakePosters(); }).observe(document.body,
+  { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'src', 'data-poster-collision'], characterData: true });
+document.querySelector('#main').addEventListener('transitionrun', wakePosters);
+document.querySelector('#main').addEventListener('load', wakePosters, true);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) for (const poster of posters) releasePoster(poster, true);
   cancelAnimationFrame(frame);

@@ -1,0 +1,311 @@
+{
+  "settings": {
+    "postersPerClick": 12,
+    "minSize": 48,
+    "maxSize": 72,
+    "minLaunchSpeed": 180,
+    "maxLaunchSpeed": 440,
+    "upwardBoost": 210,
+    "launchRadius": 48,
+    "starCount": 18,
+    "starColors": [
+      "#fff3c8",
+      "#dfdfdf",
+      "#c6d9f6"
+    ],
+    "cleanupAfterClicks": 7,
+    "thanksDurationMs": 3000,
+    "comboDurationMs": 1500
+  },
+  "designs": [
+    {
+      "kind": "type",
+      "symbol": "Aa",
+      "caption": "TYPE / STUDY",
+      "paper": "#e7e8bb",
+      "ink": "#242424",
+      "accent": "#687746",
+      "image": null
+    },
+    {
+      "kind": "grid",
+      "symbol": "01",
+      "caption": "FORM / SYSTEM",
+      "paper": "#7a9be0",
+      "ink": "#152442",
+      "accent": "#152442",
+      "image": null
+    },
+    {
+      "kind": "orbit",
+      "symbol": "*",
+      "caption": "IN MOTION",
+      "paper": "#b7a0df",
+      "ink": "#30204e",
+      "accent": "#30204e",
+      "image": null
+    },
+    {
+      "kind": "frames",
+      "symbol": "FG",
+      "caption": "FRAME / GENERATE",
+      "paper": "#253c35",
+      "ink": "#cae4b5",
+      "accent": "#cae4b5",
+      "image": null
+    },
+    {
+      "kind": "editorial",
+      "symbol": "Make\nit.",
+      "caption": "NEW IDEAS",
+      "paper": "#f0a088",
+      "ink": "#572b28",
+      "accent": "#572b28",
+      "image": null
+    },
+    {
+      "kind": "shape",
+      "symbol": "+",
+      "caption": "PLAY / REPEAT",
+      "paper": "#efe9db",
+      "ink": "#d76e36",
+      "accent": "#d76e36",
+      "image": null,
+      "symbolColor": "#252525"
+    }
+  ],
+  "messages": {
+    "dirty": "Hey, that's bad. Clean Up!",
+    "cleaning": "Keep going!",
+    "completed": "Thanks, the page lags a little less now. Put the cleaner back.",
+    "thanks": "Thanks.",
+    "recovered": "Don't do it again.",
+    "scattered": "Design posters scattered.",
+    "cleanCombos": [
+      "InstaClean",
+      "DoubleClean!",
+      "TrippleClean!!!",
+      "QuadClean!!!!",
+      "PentaClean!!!!!",
+      "HexaClean!!!!!!",
+      "HeptaClean!!!!!!!",
+      "OctaClean!!!!!!!!",
+      "NonaClean!!!!!!!!!",
+      "DecaClean!!!!!!!!!!"
+    ],
+    "cleaningGod": "Cleaning GOD!"
+  },
+  "actions": {
+    "putAway": "Put away",
+    "clean": "Clean",
+    "dismiss": "Dismiss message",
+    "cleanupLabel": "Screen cleanup"
+  },
+  "vacuumInstructions": "Move or drag near posters to vacuum them. You can also use the arrow keys. Press Escape to put the vacuum away.",
+  "crash": {
+    "platforms": {
+      "windows": {
+        "symbol": ":(",
+        "title": "Your screen ran into a problem."
+      },
+      "mac": {
+        "symbol": "⏻",
+        "title": "Your screen stopped because of a problem."
+      },
+      "ios": {
+        "symbol": "⏻",
+        "title": "Too many posters."
+      },
+      "android": {
+        "symbol": "!",
+        "title": "Poster UI isn't responding"
+      },
+      "linux": {
+        "symbol": "[!]",
+        "title": "Kernel panic: too many posters"
+      },
+      "chromeos": {
+        "symbol": ":(",
+        "title": "Something went wrong."
+      },
+      "browser": {
+        "symbol": ":(",
+        "title": "This page has stopped responding."
+      }
+    },
+    "description": "You are not seeing sh#t with those around.",
+    "code": "TOO_MANY_POSTERS",
+    "brand": "What is wrong with you? - Adil",
+    "reloadLabel": "Reload page",
+    "errorDetailsLabel": "Open error details",
+    "image": {
+      "src": "error-details.svg",
+      "alt": "Scan for error details"
+    },
+    "errorDetailsUrl": "https://youtu.be/dQw4w9WgXcQ?si=cW20VT_16FJmf2Zv"
+  },
+  "messageStyles": {
+    "dirty": {
+      "color": "#ac3025",
+      "font": "display",
+      "size": 21,
+      "weight": 700,
+      "italic": false,
+      "box": "warning",
+      "paper": "#fff0dc",
+      "accent": "#ac3025"
+    },
+    "cleaning": {
+      "color": "#166056",
+      "font": "mono",
+      "size": 18,
+      "weight": 700,
+      "italic": false,
+      "box": "console",
+      "paper": "#e0f2e9",
+      "accent": "#166056"
+    },
+    "completed": {
+      "color": "#344f28",
+      "font": "sans",
+      "size": 15,
+      "weight": 500,
+      "italic": false,
+      "box": "stamp",
+      "paper": "#e4eedb",
+      "accent": "#344f28"
+    },
+    "thanks": {
+      "color": "#683d86",
+      "font": "serif",
+      "size": 25,
+      "weight": 700,
+      "italic": true,
+      "box": "note",
+      "paper": "#eee3f5",
+      "accent": "#683d86"
+    },
+    "recovered": {
+      "color": "#8b471b",
+      "font": "mono",
+      "size": 18,
+      "weight": 700,
+      "italic": false,
+      "box": "ticket",
+      "paper": "#fff0df",
+      "accent": "#8b471b"
+    },
+    "cleanCombos": [
+      {
+        "color": "#235bb2",
+        "font": "mono",
+        "size": 19,
+        "weight": 700,
+        "italic": false,
+        "box": "arcade",
+        "paper": "#e1ecff",
+        "accent": "#235bb2"
+      },
+      {
+        "color": "#71349b",
+        "font": "serif",
+        "size": 23,
+        "weight": 700,
+        "italic": true,
+        "box": "ticket",
+        "paper": "#f1e3ff",
+        "accent": "#71349b"
+      },
+      {
+        "color": "#b63b20",
+        "font": "display",
+        "size": 25,
+        "weight": 700,
+        "italic": false,
+        "box": "arcade",
+        "paper": "#ffeadf",
+        "accent": "#b63b20"
+      },
+      {
+        "color": "#126d68",
+        "font": "rounded",
+        "size": 22,
+        "weight": 700,
+        "italic": false,
+        "box": "ticket",
+        "paper": "#dff3ee",
+        "accent": "#126d68"
+      },
+      {
+        "color": "#8d3284",
+        "font": "display",
+        "size": 25,
+        "weight": 700,
+        "italic": false,
+        "box": "arcade",
+        "paper": "#f7e0f3",
+        "accent": "#8d3284"
+      },
+      {
+        "color": "#30652b",
+        "font": "serif",
+        "size": 23,
+        "weight": 700,
+        "italic": true,
+        "box": "ticket",
+        "paper": "#e8f0de",
+        "accent": "#30652b"
+      },
+      {
+        "color": "#91490d",
+        "font": "mono",
+        "size": 20,
+        "weight": 700,
+        "italic": false,
+        "box": "arcade",
+        "paper": "#fff0d9",
+        "accent": "#91490d"
+      },
+      {
+        "color": "#a12c53",
+        "font": "rounded",
+        "size": 23,
+        "weight": 700,
+        "italic": false,
+        "box": "ticket",
+        "paper": "#ffe3ec",
+        "accent": "#a12c53"
+      },
+      {
+        "color": "#4144a3",
+        "font": "display",
+        "size": 26,
+        "weight": 700,
+        "italic": false,
+        "box": "arcade",
+        "paper": "#e5e6ff",
+        "accent": "#4144a3"
+      },
+      {
+        "color": "#762992",
+        "font": "display",
+        "size": 27,
+        "weight": 700,
+        "italic": false,
+        "box": "ticket",
+        "paper": "#f1e0ff",
+        "accent": "#762992"
+      }
+    ],
+    "cleaningGod": {
+      "color": "#ffe29a",
+      "font": "display",
+      "size": 29,
+      "weight": 900,
+      "italic": false,
+      "box": "god",
+      "paper": "#241b30",
+      "accent": "#ebbf67"
+    }
+  }
+}

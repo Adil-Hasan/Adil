@@ -1,111 +1,91 @@
-const careerSection = document.querySelector('#career');
-const careerFlow = careerSection.querySelector('.career-flow');
-const chapters = [...careerSection.querySelectorAll('.career-chapter')];
-const stops = [...careerSection.querySelectorAll('.career-stop')];
-const nextChapter = careerSection.querySelector('.career-next');
-const chapterNumber = careerSection.querySelector('.career-current-number');
-const careerMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-let activeChapter = 0;
-let scrollFrame = 0;
-let nextTarget = 1;
+document.querySelectorAll('#career .career-image').forEach(image => {
+  const direction = Math.random() < .5 ? -1 : 1;
+  const angle = direction * (1 + Math.random());
+  image.style.setProperty('--career-image-tilt', `${angle.toFixed(2)}deg`);
+});
 
-function setActiveChapter(index) {
-  activeChapter = index;
-  careerSection.style.setProperty('--career-accent', chapters[index].dataset.accent);
-  chapterNumber.textContent = String(index + 1).padStart(2, '0');
-  nextChapter.querySelector('span').textContent = index === chapters.length - 1 ? 'Back to start' : 'Next chapter';
-  nextChapter.classList.toggle('is-last', index === chapters.length - 1);
-  stops.forEach((stop, position) => {
-    stop.classList.toggle('is-active', position === index);
-    stop.classList.toggle('is-past', position < index);
-    if (position === index) stop.setAttribute('aria-current', 'step');
-    else stop.removeAttribute('aria-current');
-    chapters[position].classList.toggle('is-active', position === index);
-  });
-}
+const stickers = [...document.querySelectorAll('#career .career-sticker')];
+const tipAnimations = new WeakMap();
+const tipMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let openSticker;
+let pinnedSticker;
 
-function updateJourney() {
-  scrollFrame = 0;
-  if (document.hidden || document.body.classList.contains('is-crashed')) return;
-  const bounds = careerSection.getBoundingClientRect();
-  if (bounds.top > innerHeight || bounds.bottom < 0) return;
-  const headerHeight = document.querySelector('.site-header').getBoundingClientRect().height;
-  const readingLine = headerHeight + (innerHeight - headerHeight) * .46;
-  const centers = chapters.map(chapter => {
-    const rect = chapter.getBoundingClientRect();
-    return rect.top + rect.height / 2;
-  });
-  let closest = 0;
-  for (let index = 1; index < centers.length; index++) {
-    if (Math.abs(centers[index] - readingLine) < Math.abs(centers[closest] - readingLine)) closest = index;
+function animateTip(sticker, opening) {
+  const tip = sticker.querySelector('.career-sticker-tip');
+  const style = !tip.hidden ? getComputedStyle(tip) : null;
+  const start = style
+    ? { opacity: style.opacity, translate: style.translate, scale: style.scale }
+    : { opacity: 0, translate: '0 8px', scale: '.94' };
+  tipAnimations.get(tip)?.cancel();
+  tipAnimations.delete(tip);
+  if (tipMotion.matches) {
+    tip.hidden = !opening;
+    return;
   }
-  const distance = centers.at(-1) - centers[0];
-  const progress = Math.max(0, Math.min(1, (readingLine - centers[0]) / distance));
-  careerSection.style.setProperty('--career-progress', String(closest === chapters.length - 1 ? 1 : progress));
-  if (closest !== activeChapter) setActiveChapter(closest);
-  const firstAhead = chapters[0].getBoundingClientRect().top >= innerHeight * .75;
-  nextTarget = firstAhead ? 0 : (activeChapter + 1) % chapters.length;
-  nextChapter.querySelector('span').textContent = firstAhead ? 'Start journey' : activeChapter === chapters.length - 1 ? 'Back to start' : 'Next chapter';
-}
-
-function requestJourneyUpdate() {
-  if (!scrollFrame && !document.hidden) scrollFrame = requestAnimationFrame(updateJourney);
-}
-
-function goToChapter(index) {
-  chapters[index].classList.add('is-revealed');
-  chapters[index].scrollIntoView({ block: innerWidth <= 980 ? 'start' : 'center', behavior: careerMotion.matches ? 'instant' : 'smooth' });
-  requestJourneyUpdate();
-}
-
-stops.forEach((stop, index) => {
-  stop.addEventListener('click', event => { event.preventDefault(); goToChapter(index); });
-  stop.addEventListener('keydown', event => {
-    const target = { ArrowDown: Math.min(index + 1, chapters.length - 1), ArrowRight: Math.min(index + 1, chapters.length - 1),
-      ArrowUp: Math.max(index - 1, 0), ArrowLeft: Math.max(index - 1, 0), Home: 0, End: chapters.length - 1 }[event.key];
-    if (target === undefined) return;
-    event.preventDefault();
-    stops[target].focus({ preventScroll: true });
-    goToChapter(target);
+  tip.hidden = false;
+  const frames = opening
+    ? [start, { opacity: 1, translate: '0 -2px', scale: '1.015', offset: .72 }, { opacity: 1, translate: '0 0', scale: '1' }]
+    : [start, { opacity: 0, translate: '0 5px', scale: '.97' }];
+  const animation = tip.animate(frames, {
+    duration: opening ? 260 : 130,
+    easing: opening ? 'cubic-bezier(.22,.75,.25,1)' : 'ease-in',
+    fill: 'both',
   });
-});
-nextChapter.addEventListener('click', () => goToChapter(nextTarget));
-careerSection.querySelector('.career-replay').addEventListener('click', () => goToChapter(0));
+  tipAnimations.set(tip, animation);
+  animation.finished.then(() => {
+    if (tipAnimations.get(tip) !== animation) return;
+    if (!opening) tip.hidden = true;
+    tipAnimations.delete(tip);
+    animation.cancel();
+  }, () => {});
+}
 
-const reveal = new IntersectionObserver(entries => {
-  for (const entry of entries) {
-    if (!entry.isIntersecting) continue;
-    entry.target.classList.add('is-revealed');
-    reveal.unobserve(entry.target);
+function closeSticker() {
+  if (!openSticker) return;
+  openSticker.querySelector('button').setAttribute('aria-expanded', 'false');
+  animateTip(openSticker, false);
+  openSticker = undefined;
+  pinnedSticker = undefined;
+}
+
+function showSticker(sticker) {
+  if (openSticker === sticker) return;
+  closeSticker();
+  openSticker = sticker;
+  sticker.querySelector('button').setAttribute('aria-expanded', 'true');
+  animateTip(sticker, true);
+}
+
+tipMotion.addEventListener('change', () => {
+  if (tipMotion.matches) {
+    for (const sticker of stickers) tipAnimations.get(sticker.querySelector('.career-sticker-tip'))?.finish();
   }
-}, { threshold: .15, rootMargin: '0px 0px -8% 0px' });
-chapters.forEach(chapter => {
-  reveal.observe(chapter);
-  chapter.addEventListener('pointermove', event => {
-    if (careerMotion.matches || event.pointerType !== 'mouse') return;
-    const rect = chapter.getBoundingClientRect();
-    chapter.style.setProperty('--tilt-x', `${(event.clientY - rect.top - rect.height / 2) / rect.height * -8}deg`);
-    chapter.style.setProperty('--tilt-y', `${(event.clientX - rect.left - rect.width / 2) / rect.width * 8}deg`);
+});
+
+stickers.forEach(sticker => {
+  const button = sticker.querySelector('button');
+  sticker.addEventListener('pointerenter', event => {
+    if (event.pointerType === 'mouse') showSticker(sticker);
   });
-  chapter.addEventListener('pointerleave', () => {
-    chapter.style.setProperty('--tilt-x', '0deg');
-    chapter.style.setProperty('--tilt-y', '0deg');
+  sticker.addEventListener('pointerleave', () => {
+    if (openSticker === sticker && pinnedSticker !== sticker && !sticker.contains(document.activeElement)) closeSticker();
+  });
+  button.addEventListener('focus', () => showSticker(sticker));
+  button.addEventListener('click', () => {
+    if (pinnedSticker === sticker) closeSticker();
+    else {
+      showSticker(sticker);
+      pinnedSticker = sticker;
+    }
+  });
+  sticker.addEventListener('focusout', event => {
+    if (openSticker === sticker && !sticker.contains(event.relatedTarget)) closeSticker();
   });
 });
-careerMotion.addEventListener('change', () => {
-  if (careerMotion.matches) chapters.forEach(chapter => {
-    chapter.classList.add('is-revealed');
-    chapter.style.setProperty('--tilt-x', '0deg');
-    chapter.style.setProperty('--tilt-y', '0deg');
-  });
-  requestJourneyUpdate();
+
+document.addEventListener('pointerdown', event => {
+  if (openSticker && !openSticker.contains(event.target)) closeSticker();
 });
-window.addEventListener('scroll', requestJourneyUpdate, { passive: true });
-window.addEventListener('resize', requestJourneyUpdate);
-window.addEventListener('poster-crash', () => { cancelAnimationFrame(scrollFrame); scrollFrame = 0; });
-document.addEventListener('visibilitychange', requestJourneyUpdate);
-new ResizeObserver(requestJourneyUpdate).observe(careerFlow);
-careerFlow.classList.add('is-ready');
-if (careerMotion.matches) chapters.forEach(chapter => chapter.classList.add('is-revealed'));
-setActiveChapter(0);
-requestJourneyUpdate();
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeSticker();
+});

@@ -1,0 +1,109 @@
+{
+  "settings": {
+    "maxWidth": 320,
+    "maxImageHeight": 480,
+    "padding": 14
+  },
+  "cards": [
+    {
+      "title": "Visual designer",
+      "description": "Visual identities, typography and art direction.",
+      "color": "#c5d8b6",
+      "image": {
+        "src": "projects/design/01.svg",
+        "alt": "Cream typography poster with large Aa lettering and a lime arrow."
+      },
+      "stickers": [
+        {
+          "src": "career/spark.png",
+          "title": "Type and contrast",
+          "description": "A demo study in bold letterforms and simple shapes.",
+          "width": 17,
+          "rotation": 10
+        },
+        {
+          "src": "career/smiley.png",
+          "title": "Room to play",
+          "description": "A little personality goes a long way.",
+          "width": 17,
+          "rotation": -12
+        }
+      ]
+    },
+    {
+      "title": "Product designer",
+      "description": "Research, interaction and design systems.",
+      "color": "#b8cbec",
+      "image": {
+        "src": "projects/design/02.svg",
+        "alt": "Cobalt-blue poster with a modular arrangement of cream circles and squares."
+      },
+      "stickers": [
+        {
+          "src": "career/smiley.png",
+          "title": "Connected pieces",
+          "description": "A demo of a visual system built from a few reusable shapes.",
+          "width": 17,
+          "rotation": -8
+        },
+        {
+          "src": "career/spark.png",
+          "title": "Small details",
+          "description": "Try hovering or tapping these stickers to explore the work.",
+          "width": 18,
+          "rotation": 12
+        }
+      ]
+    },
+    {
+      "title": "Designer and builder",
+      "description": "Design and code for useful tools.",
+      "color": "#edb19a",
+      "image": {
+        "src": "projects/framegen/02.svg",
+        "alt": "Dark green poster showing a stack of frames and the words Repeat less."
+      },
+      "stickers": [
+        {
+          "src": "career/spark.png",
+          "title": "One idea, many frames",
+          "description": "A demo of turning repeated design work into a reusable tool.",
+          "width": 18,
+          "rotation": -10
+        },
+        {
+          "src": "career/smiley.png",
+          "title": "Make time to make",
+          "description": "Less repetition leaves more time for the next idea.",
+          "width": 16,
+          "rotation": 8
+        }
+      ]
+    },
+    {
+      "title": "What’s next?",
+      "description": "More ideas to explore and things to make.",
+      "color": "#e6ddc9",
+      "image": {
+        "src": "projects/experiments/03.svg",
+        "alt": "Lavender poster with overlapping purple orbital lines and the words Stay curious."
+      },
+      "stickers": [
+        {
+          "src": "career/smiley.png",
+          "title": "Stay curious",
+          "description": "A demo space for experiments and unfinished ideas.",
+          "width": 16,
+          "rotation": -12
+        },
+        {
+          "src": "career/spark.png",
+          "title": "The next idea",
+          "description": "There is always something else to try.",
+          "width": 18,
+          "rotation": 8
+        }
+      ]
+    }
+  ]
+}

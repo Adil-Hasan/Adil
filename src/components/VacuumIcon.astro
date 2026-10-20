@@ -1,0 +1,14 @@
+---
+const { class: className, wind = false } = Astro.props;
+---
+
+<svg class={className} viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  {wind && <g class="vacuum-wind"><path d="M-6 41H0M-4 34l5 3M-4 48l5-3" /></g>}
+  <path d="M38 29V21c0-14-17-18-22-3L8 43" />
+  <path d="M3 43h14l4 10H1Z" fill="currentColor" stroke-width="2" />
+  <rect x="29" y="27" width="30" height="25" rx="9" fill="currentColor" fill-opacity=".15" />
+  <path d="M39 27v-6h11v6M38 44h12" />
+  <circle cx="44" cy="36" r="4" />
+  <circle cx="35" cy="54" r="4" fill="currentColor" stroke-width="2" />
+  <circle cx="53" cy="54" r="4" fill="currentColor" stroke-width="2" />
+</svg>

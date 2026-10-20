@@ -1,4 +1,5 @@
 import { burstDesigns, canBurstDesigns } from './poster-playground.js';
+import posterContent from '../../public/posters.json';
 
 const canvas = document.querySelector('#dot-grid');
 const context = canvas.getContext('2d');
@@ -174,7 +175,6 @@ button.addEventListener('click', () => {
   const bounds = buttonFace.getBoundingClientRect();
   const restingStyle = getComputedStyle(buttonFace);
   const resting = { transform: restingStyle.transform, boxShadow: restingStyle.boxShadow };
-  const buttonBounds = button.getBoundingClientRect();
   const canvasBounds = canvas.getBoundingClientRect();
   const pressed = { transform: 'translateY(0)', boxShadow: 'inset 0 1px 2px #0002, 0 0 0 #8a8a8a' };
   pressAnimation = buttonFace.animate([
@@ -191,11 +191,11 @@ button.addEventListener('click', () => {
     pressAnimation = undefined;
   };
   pressAnimation.finished.then(release, release);
-  status.textContent = 'Design posters scattered.';
+  status.textContent = posterContent.messages.scattered;
   statusTimer = setTimeout(() => { status.textContent = ''; }, 1100);
   const x = bounds.left + bounds.width / 2;
   const y = bounds.top + bounds.height / 2;
-  burstDesigns(x, y, buttonBounds);
+  burstDesigns(x, y);
   if (motionPreference.matches || !canBurstDesigns()) return;
   addRipple(x - canvasBounds.left, y - canvasBounds.top);
 });

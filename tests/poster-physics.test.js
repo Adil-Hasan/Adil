@@ -37,6 +37,70 @@ test('new posters collide with page surfaces on their first frame', () => {
   assert.ok(poster.vy <= 0);
 });
 
+test('small PNG surfaces bounce posters while leaving the surrounding image clear', () => {
+  const sticker = { left: 340, right: 380, top: 245, bottom: 285, previousTop: 245, vx: 0, vy: 0 };
+  const hit = createPoster({ x: 360, y: 225, size: 30, vy: 160 });
+  const miss = createPoster({ x: 440, y: 225, size: 30, vy: 160 });
+  const result = stepPosters([hit, miss], { dt: 1 / 60, bounds, obstacles: [sticker], gravity: 0 });
+  assert.ok(result.impacts > 0);
+  assert.ok(hit.y + posterExtents(hit).y <= sticker.top + .5);
+  assert.ok(hit.vy <= 0);
+  advance([miss], .6, { obstacles: [sticker], gravity: 0 });
+  assert.ok(miss.y - posterExtents(miss).y > sticker.bottom);
+});
+
+test('an animated PNG moving upward wakes and pushes a resting poster', () => {
+  const poster = createPoster({ x: 400, y: 281.25, size: 30 });
+  poster.asleep = true;
+  const sticker = { left: 380, right: 420, top: 296, bottom: 336, previousTop: 300, vx: 0, vy: -240 };
+  const result = stepPosters([poster], { dt: 1 / 60, bounds, obstacles: [sticker] });
+  assert.ok(result.impacts > 0);
+  assert.equal(poster.asleep, false);
+  assert.ok(poster.vy < 0);
+  assert.ok(poster.y + posterExtents(poster).y <= sticker.top + .5);
+});
+
+test('a new burst can spill through the central text and button', () => {
+  const center = { left: 350, right: 450, top: 280, bottom: 340, previousTop: 280,
+    vx: 0, vy: 0, repel: true, launchThrough: true };
+  const poster = createPoster({ x: 400, y: 300, size: 60, vx: 120, leavingHero: true });
+  const result = stepPosters([poster], { dt: 1 / 60, bounds, obstacles: [center], gravity: 0 });
+  assert.equal(result.impacts, 0);
+  assert.equal(poster.leavingHero, true);
+  assert.equal(poster.y, 300);
+  assert.ok(poster.x > 400 && poster.x < 403);
+});
+
+test('gaps between hero lines do not prematurely end the spill', () => {
+  const lines = [180, 350].map(top => ({ left: 300, right: 500, top, bottom: top + 20,
+    previousTop: top, vx: 0, vy: 0, launchThrough: true }));
+  const poster = createPoster({ x: 400, y: 280, size: 30, leavingHero: true });
+  stepPosters([poster], { dt: 1 / 60, bounds, obstacles: lines, gravity: 0 });
+  assert.equal(poster.leavingHero, true);
+});
+
+test('hero collisions resume when a poster returns after clearing the center', () => {
+  const center = { left: 350, right: 450, top: 200, bottom: 400, previousTop: 200,
+    vx: 0, vy: 0, launchThrough: true };
+  const poster = createPoster({ x: 400, y: 300, size: 60, vx: 300, leavingHero: true });
+  advance([poster], .4, { obstacles: [center], gravity: 0 });
+  assert.equal(poster.leavingHero, false);
+  poster.vx = -300;
+  advance([poster], .25, { obstacles: [center], gravity: 0 });
+  assert.ok(poster.vx > 0);
+  assert.ok(poster.x - posterExtents(poster).x >= center.right);
+});
+
+test('spilling posters still collide with ordinary page content', () => {
+  const hero = { left: 100, right: 700, top: 100, bottom: 450, previousTop: 100,
+    vx: 0, vy: 0, launchThrough: true };
+  const ledge = { left: 300, right: 500, top: 330, bottom: 350, previousTop: 330, vx: 0, vy: 0 };
+  const poster = createPoster({ x: 400, y: 300, size: 60, vy: 120, leavingHero: true });
+  const result = stepPosters([poster], { dt: 1 / 60, bounds, obstacles: [hero, ledge], gravity: 0 });
+  assert.ok(result.impacts > 0);
+  assert.ok(poster.y + posterExtents(poster).y <= ledge.top + .5);
+});
+
 test('launch collisions follow the visible size as posters grow', () => {
   const a = createPoster({ x: 300, y: 250, size: 60, scale: .2 });
   const b = createPoster({ x: 325, y: 250, size: 60, scale: .2 });
@@ -49,6 +113,19 @@ test('launch collisions follow the visible size as posters grow', () => {
   assert.equal(a.scale, 1);
   assert.equal(b.scale, 1);
   assert.ok(b.x - a.x > 59, 'growing cards should separate before the former collision delay');
+});
+
+test('the burst button sends posters sideways instead of letting them balance on it', () => {
+  const button = { left: 350, right: 450, top: 330, bottom: 370, previousTop: 330, vx: 0, vy: 0, repel: true };
+  for (const [x, direction] of [[380, -1], [420, 1]]) {
+    const poster = createPoster({ x, y: 300, size: 60, vy: 120 });
+    stepPosters([poster], { dt: 1 / 60, bounds, obstacles: [button], gravity: 0 });
+    assert.ok(poster.vx * direction >= 180);
+    assert.ok(poster.y + posterExtents(poster).y <= button.top + .5);
+    advance([poster], .6, { obstacles: [button] });
+    const extent = posterExtents(poster);
+    assert.ok(poster.x + extent.x < button.left || poster.x - extent.x > button.right);
+  }
 });
 
 test('separating axes distinguish rotated posters from overlapping bounding boxes', () => {

@@ -1,0 +1,21 @@
+{
+  "description": "Say hello, follow along, or support what I make.",
+  "email": "hello@example.com",
+  "copy": {
+    "label": "Copy email",
+    "pending": "Copying...",
+    "copied": "Copied!",
+    "success": "Email copied to clipboard.",
+    "error": "Couldn't copy automatically. Select the address below.",
+    "emailLabel": "Email address"
+  },
+  "cards": [
+    { "platform": "mail", "label": "Mail", "color": "#eed2ae", "rotation": -4 },
+    { "platform": "facebook", "label": "Facebook", "detail": "Follow along", "url": "https://www.facebook.com/", "color": "#b9cdee", "rotation": 3 },
+    { "platform": "youtube", "label": "YouTube", "detail": "Watch a little", "url": "https://www.youtube.com/", "color": "#edb5a6", "rotation": -2 },
+    { "platform": "linkedin", "label": "LinkedIn", "detail": "Let's connect", "url": "https://www.linkedin.com/", "color": "#b9d7dc", "rotation": 4 },
+    { "platform": "instagram", "label": "Instagram", "detail": "Bits of everyday", "url": "https://www.instagram.com/", "color": "#d9bce3", "rotation": -3 },
+    { "platform": "github", "label": "GitHub", "detail": "Behind the builds", "url": "https://github.com/", "color": "#c9d6bd", "rotation": 2 },
+    { "platform": "supportkori", "label": "SupportKori", "detail": "Fuel the next idea", "url": "https://www.supportkori.com/", "icon": "contact/supportkori.svg", "color": "#e3d58b", "rotation": -3 }
+  ]
+}

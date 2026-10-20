@@ -1,14 +1,20 @@
 import { posterExtents } from './poster-physics.js';
 
 export const FIRST_CHAT_PRESS = 7;
-export const WARNING_PRESS = FIRST_CHAT_PRESS + 5;
 
-export function chatStage({ presses, posterCount, gift = false, recovered = false, pickup = false }) {
-  if (recovered && presses < FIRST_CHAT_PRESS) return 'recovered';
-  if (!posterCount) return gift ? (pickup ? 'pickup' : 'gift') : 'hidden';
-  if (pickup && presses >= FIRST_CHAT_PRESS) return 'pickup';
-  if (presses >= WARNING_PRESS) return 'warning';
-  return presses >= FIRST_CHAT_PRESS ? 'dirty' : 'hidden';
+export function cleanComboMessage(clicks, messages, finalMessage) {
+  if (!Number.isInteger(clicks) || clicks < 1 || !messages.length) return null;
+  return clicks > messages.length ? finalMessage ?? null : messages[clicks - 1];
+}
+
+export function chatStage({ presses, posterCount, vacuumActive = false, cleaned = false, recovered = false, threshold = FIRST_CHAT_PRESS }) {
+  if (posterCount) {
+    if (vacuumActive) return 'cleaning';
+    if (presses >= threshold) return 'dirty';
+  }
+  if (cleaned && !posterCount) return vacuumActive ? 'completed' : 'thanks';
+  if (recovered && presses < threshold) return 'recovered';
+  return 'hidden';
 }
 
 export function screenCoverage(posters, { width, height }) {
@@ -55,35 +61,4 @@ export function crashPlatform({ platform = '', userAgent = '', maxTouchPoints = 
   if (/CrOS/i.test(device)) return 'chromeos';
   if (/Linux/i.test(device)) return 'linux';
   return 'browser';
-}
-
-export function floorPile(posters, height) {
-  const candidates = posters.filter(poster => poster.mode === 'loose' && poster.age > .5
-    && (poster.asleep || (poster.touching && poster.vy > -120))).map(poster => {
-    const extent = posterExtents(poster);
-    return { left: poster.x - extent.x, right: poster.x + extent.x, top: poster.y - extent.y, bottom: poster.y + extent.y };
-  }).sort((a, b) => b.bottom - a.bottom);
-  const pile = [];
-  for (const rect of candidates) {
-    const supported = rect.bottom >= height - 6 || pile.some(base =>
-      rect.left <= base.right + 8 && rect.right >= base.left - 8
-      && rect.bottom >= base.top - 8 && rect.top < base.top);
-    if (supported) pile.push(rect);
-  }
-  return pile;
-}
-
-export function cleanupBottom({ pile, left, right, height, bubbleHeight, baseBottom, topInset = 16, avoidRect }) {
-  let pileTop = height;
-  for (const rect of pile) {
-    if (rect.right >= left - 12 && rect.left <= right + 12) pileTop = Math.min(pileTop, rect.top);
-  }
-  let wanted = Math.max(baseBottom, height - pileTop + 20);
-  if (avoidRect && avoidRect.right >= left && avoidRect.left <= right
-    && height - wanted > avoidRect.top - 20
-    && height - wanted - bubbleHeight < avoidRect.bottom + 20
-    && avoidRect.top >= topInset + bubbleHeight + 20) {
-    wanted = height - avoidRect.top + 20;
-  }
-  return Math.max(baseBottom, Math.min(wanted, height - bubbleHeight - topInset));
 }

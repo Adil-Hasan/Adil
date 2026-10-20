@@ -1,0 +1,45 @@
+{
+  "name": "Adil Hasan",
+  "title": "Adil Hasan",
+  "description": "Adil Hasan. Why fight with a template everyday when you can just press a button?",
+  "favicon": "favicon.svg",
+  "sections": {
+    "projects": "Projects",
+    "career": "Career",
+    "framegen": "FrameGen",
+    "contact": "Find Me"
+  },
+  "hero": {
+    "desktopLines": [
+      "Why fight with a template",
+      "everyday when you can"
+    ],
+    "mobileLines": [
+      "Why fight with a",
+      "template when you",
+      "can just press a"
+    ],
+    "desktopLastLine": "just press a",
+    "buttonLabel": "button",
+    "punctuation": "?",
+    "signature": "- Adil",
+    "note": "(guy who was so mad at repeating designs that he made an entire tool to do that for him.)",
+    "scrollLabel": "Scroll to projects"
+  },
+  "projects": {
+    "loading": "Opening the folders…",
+    "empty": "New work is on the way.",
+    "error": "The folders couldn’t load. Please try refreshing.",
+    "imageError": "Image unavailable",
+    "back": "Back",
+    "backLabel": "Back to project folders",
+    "openLabel": "Open",
+    "imagesLabel": "images"
+  },
+  "accessibility": {
+    "introduction": "Introduction",
+    "mainNavigation": "Main navigation",
+    "home": "home",
+    "skipContent": "Skip to content"
+  }
+}

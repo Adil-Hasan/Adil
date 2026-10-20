@@ -2,6 +2,10 @@
 
 A static Astro portfolio with vanilla JavaScript interactions. No database or admin panel.
 
+## Edit content
+
+Start with [EDITING.md](EDITING.md) for the editing guide. Page copy and images live in `public/site.json`, button-click posters and their messages in `public/posters.json`, project folders in `public/projects.json`, and career cards in `public/career.json`. These are ordinary text files. Visible content gets poster collision by default. The standing rules are in `AGENTS.md`.
+
 ## Run locally
 
 ```sh
@@ -15,23 +19,39 @@ The home page is `src/pages/index.astro`. Its sections live in `src/components/`
 
 ## Poster playground
 
-The hero button scatters posters that collect at the bottom of the viewport and collide with each other, visible navigation text, headings, and project artwork as you scroll. Posters tumble off content and can be grabbed, dragged, and thrown. Further presses wait until the button pops back out. Stars fade away; posters remain until you clean them.
+Edit `public/posters.json` for poster symbols, captions, colors, replacement images, quantity, sizes, launch settings, cleanup messages, and error-screen text and imagery. [EDITING.md](EDITING.md#button-click-posters) has examples and valid values.
 
-Posters launch from a small ring around the button. Their collision shapes grow with the visible cards, and collisions run from the first frame so there is no delayed switch into physics.
+The hero button scatters posters that collect at the bottom of the viewport and collide with each other, the hero text and button, visible navigation text, headings, and project artwork as you scroll. The button stays above the posters and sends them aside on contact. Posters tumble off content and can be grabbed, dragged, and thrown. Further presses wait until the button pops back out. Stars fade away; posters remain until you clean them. On screens up to 760px wide, the header hides its navigation links and centers the name.
 
-The cleanup chat appears after seven accepted presses. Click the vacuum icon to pick it up; the button becomes an empty outline while the vacuum is in use. Move or drag near posters to suck them up, or move the vacuum with the arrow keys. Cleaning every poster resets the press count and keeps the vacuum as a gift. Clicking the empty outline or pressing Escape puts it away and restores the icon.
+Posters launch from a small ring around the button. Their collision shapes grow with the visible cards. New posters pass through the central hero text and button until they have fully cleared that cluster, then collide with it if they return. Gravity, poster-to-poster collisions, and collisions with the rest of the page run throughout the spill.
 
-The chat pops into view and rises above posters piled beneath it. Five more presses turn it red with "Please! Stop! Clean up!" You can keep pressing. When posters cover most of the viewport, the page shows a platform-themed crash screen. Reloading clears the pile and shows "Don't do it again." once. The pile lasts for the current page visit; only the reload reminder uses session storage.
+After seven accepted button presses, the cleanup popup says "Hey, that's bad. Clean Up!" Click the vacuum icon to pick it up; the button becomes an empty outline. The popup says "Keep going!" throughout cleaning. Move or drag near posters to vacuum them, or use the arrow keys.
 
-Each message has a portrait and a close button. Closing it animates it away. In the red phase, another accepted hero-button press brings the warning back, including during the closing animation. Picking up the vacuum briefly shows "Oooh, nice." Error screens include a scannable, clickable QR code with an encoded destination; it sits beside the full error content on large screens.
+When every poster has been removed, the popup says "Thanks, the page lags a little less now. Put the cleaner back." Click the empty outline or press Escape to return it. The popup then says "Thanks." and disappears after three seconds. Returning the cleaner early restores the cleanup prompt. Cleaning everything resets the press count. New posters cancel the final thanks timer. Edit the messages and the cleanup threshold and timing in `public/posters.json`. The popup stays at the bottom right. Continuing to cover most of the screen still triggers the device-themed crash screen; reloading shows the existing reminder.
 
-The Career section contains a four-chapter demo with sample roles and dates. Scroll through it or use the chapter guide and next button. Each paper card reveals on arrival, its artefact tilts with the pointer, and the notebook controls expand the story. The guide stays beside the cards on desktop and becomes a compact sticky route on mobile. The last chapter can replay the journey. Career content is in `src/components/Career.astro`, with motion and navigation in `src/scripts/career-flow.js`; reduced-motion preferences are respected.
+Clicking the introduction button with the vacuum equipped cycles through ten editable combo messages: "InstaClean", "DoubleClean!", "TrippleClean!!!", and onward. Every click after ten shows "Cleaning GOD!" until the cleaner is returned, which resets the sequence. Each combo briefly replaces the normal cleanup text. Edit the messages, duration, and per-status text colors and fonts in `public/posters.json`.
+
+Each message has a close button and a vacuum icon, with no portrait. Closing it animates it away. After the cleanup threshold, another accepted hero-button press brings the prompt back. Error screens include a scannable, clickable QR code with an encoded destination; it sits beside the full error content on large screens.
+
+## Career cards
+
+Edit `public/career.json` to change career titles, descriptions, frame colors, images, and PNG stickers. The settings at the top control maximum width, maximum image height, and frame padding for every card. Cards keep a preferred width and wrap onto another centered row when they no longer fit. Change `maxWidth` to adjust their size and wrapping. Each frame follows its image’s proportions without cropping. Copy a card object to add a card, reorder objects to reorder cards, or remove an object to remove a card.
+
+The [editing guide](EDITING.md#career-cards) has complete card and sticker examples and a field reference. Each card allows up to four PNG stickers. Their edge positions vary by card and stay fixed across refreshes and rebuilds. Optional `x` and `y` fields override placement; width uses a percentage of the image. Stickers animate automatically and show details on hover, keyboard focus, or tap. Press Escape or tap outside to dismiss.
 
 Run `npm test` for the physics checks, including stacking, moving surfaces, suction, and reduced motion.
 
+## Update FrameGen
+
+Edit `public/framegen.json` to replace the logo, tagline, two screenshots, or Try in Figma button destination. Images live in `public/framegen/`. The blue panel follows the supplied design reference, scales down for phones, and keeps poster collision on its visible content. Field descriptions are in [EDITING.md](EDITING.md#framegen-section).
+
+## Update Find Me
+
+Edit `public/contact.json` for the demo email address, social profile URLs, card labels, colors, tilt, and clipboard feedback. Replace `hello@example.com` and the platform homepage links with your own details. Mail copies the address; Facebook, YouTube, LinkedIn, Instagram, GitHub, and SupportKori open their configured links in a new tab. Cards wrap naturally and have poster collision. See [EDITING.md](EDITING.md#find-me-contact-cards) for field descriptions and examples.
+
 ## Update the project folders
 
-All project content lives in **`public/projects.json`**. Each entry in `folders` becomes a clickable folder with its title centered on the front, and its first three images spill out of the preview. Clicking the folder shows all its images in a three-column grid inside Projects, with names beneath them and the folder name as the section heading. The Back button returns to the folders with a smooth fade and slide transition. Reduced-motion preferences skip the animation. The section grows for additional rows, with two columns on tablets and one on phones.
+All project content lives in **`public/projects.json`**. Each entry in `folders` becomes a clickable folder with its title centered on the front, and its first three images spill out of the preview. Clicking the folder shows its images in a wrapping layout inside Projects, with names beneath them and the folder name as the section heading. The Back button returns to the folders with a smooth fade and slide transition. Reduced-motion preferences skip the animation. Folders and gallery images move to another centered row as the available space narrows.
 
 1. Put your images in an ordinary folder, such as `public/projects/my-project/`.
 2. Add or edit an entry in `public/projects.json` using the example below. Image URLs omit `public/`.
@@ -54,9 +74,9 @@ All project content lives in **`public/projects.json`**. Each entry in `folders`
 - Keep at least **three images** per folder. There is no upper limit.
 - `title`, image `src`, and image `alt` are required. Other fields are optional.
 - `color` accepts a six-digit hex color. The folder's `title` appears on its front; each image's `title` appears beneath its image, falling back to `alt` when omitted.
-- JPG, PNG, WebP, AVIF, GIF, and SVG images are supported. Landscape images crop in the folder preview and display in full in the image grid.
+- JPG, PNG, WebP, AVIF, GIF, and SVG images are supported. Landscape images crop in the folder preview and display in full in the image gallery.
 - The included SVGs are **sample artwork**, ready to replace with actual project images.
-- More than three folders flow into additional rows. Desktop sections occupy at least one viewport; mobile layouts grow naturally.
+- Folders flow into additional rows whenever they no longer fit. Desktop sections occupy at least one viewport; mobile layouts grow naturally.
 
 ## Build and deploy
 

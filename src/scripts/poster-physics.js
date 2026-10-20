@@ -1,8 +1,8 @@
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
-export function createPoster({ x, y, size, vx = 0, vy = 0, angle = 0, spin = 0, scale = 1 }) {
+export function createPoster({ x, y, size, vx = 0, vy = 0, angle = 0, spin = 0, scale = 1, leavingHero = false }) {
   return { x, y, vx, vy, angle, spin, halfWidth: size / 2, halfHeight: size * .625,
-    age: 0, quiet: 0, asleep: false, touching: false, mode: 'loose', scale, initialScale: scale, opacity: 1 };
+    age: 0, quiet: 0, asleep: false, touching: false, mode: 'loose', scale, initialScale: scale, opacity: 1, leavingHero };
 }
 
 export function posterExtents(poster) {
@@ -95,6 +95,13 @@ function collideWithSurface(poster, surface, dt, bounds) {
     poster.asleep = false;
     poster.quiet = 0;
   }
+  if (surface.repel) {
+    // Keep the burst button clear rather than letting paper balance on it.
+    const direction = edge.x || (poster.x < (surface.left + surface.right) / 2 ? -1 : 1);
+    poster.vx = direction * Math.max(Math.abs(poster.vx), 180);
+    poster.asleep = false;
+    poster.quiet = 0;
+  }
   return true;
 }
 
@@ -154,6 +161,21 @@ function collidePosters(posters) {
 export function stepPosters(posters, { dt, bounds, obstacles = [], vacuum = null, gravity = 980 }) {
   dt = Math.min(dt, 1 / 30);
   let impacts = 0;
+  // Keep each new poster free of the whole central cluster until it has spilled out.
+  // Using its position avoids switching collisions on inside the text after a timer.
+  let heroBounds;
+  if (posters.some(poster => poster.leavingHero)) {
+    for (const surface of obstacles) {
+      if (!surface.launchThrough) continue;
+      if (!heroBounds) heroBounds = { ...surface };
+      else {
+        heroBounds.left = Math.min(heroBounds.left, surface.left);
+        heroBounds.right = Math.max(heroBounds.right, surface.right);
+        heroBounds.top = Math.min(heroBounds.top, surface.top);
+        heroBounds.bottom = Math.max(heroBounds.bottom, surface.bottom);
+      }
+    }
+  }
   for (const poster of posters) {
     if (poster.mode === 'removed') continue;
     poster.age += dt;
@@ -192,6 +214,13 @@ export function stepPosters(posters, { dt, bounds, obstacles = [], vacuum = null
       poster.y += poster.vy * dt;
       poster.angle += poster.spin * dt;
     }
+    if (poster.leavingHero) {
+      const extent = posterExtents(poster);
+      if (!heroBounds || poster.x + extent.x < heroBounds.left || poster.x - extent.x > heroBounds.right
+        || poster.y + extent.y < heroBounds.top || poster.y - extent.y > heroBounds.bottom) {
+        poster.leavingHero = false;
+      }
+    }
   }
   for (let pass = 0; pass < 4; pass++) {
     collidePosters(posters);
@@ -199,6 +228,7 @@ export function stepPosters(posters, { dt, bounds, obstacles = [], vacuum = null
       if (poster.mode !== 'loose') continue;
       containPoster(poster, bounds, dt / 4);
       for (const surface of obstacles) {
+        if (poster.leavingHero && surface.launchThrough) continue;
         if (collideWithSurface(poster, surface, dt / 4, bounds)) impacts++;
       }
       containPoster(poster, bounds, dt / 4);

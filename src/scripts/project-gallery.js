@@ -1,3 +1,5 @@
+import site from '../../public/site.json';
+
 const projectsSection = document.querySelector('#projects');
 const folderContainer = document.querySelector('#project-folders');
 const imageContainer = document.querySelector('#project-images');
@@ -52,7 +54,7 @@ async function transitionProjectView(outgoing, incoming, update, focusTarget, re
 
 function openFolder(folder, card) {
   if (changingView) return;
-  imageContainer.setAttribute('aria-label', `${folder.title} images`);
+  imageContainer.setAttribute('aria-label', `${folder.title} ${site.projects.imagesLabel}`);
   imageContainer.replaceChildren(...folder.images.map((image) => {
     const figure = element('figure', 'project-image');
     const preview = element('img');
@@ -64,7 +66,7 @@ function openFolder(folder, card) {
     frame.append(preview);
     figure.append(frame, element('figcaption', 'project-image-name', image.title || image.alt));
     preview.addEventListener('error', () => {
-      const fallback = element('span', 'project-image-error', 'Image unavailable');
+      const fallback = element('span', 'project-image-error', site.projects.imageError);
       fallback.setAttribute('role', 'status');
       frame.replaceChildren(fallback);
     }, { once: true });
@@ -81,7 +83,7 @@ function closeFolder() {
   if (changingView || !activeCard) return;
   transitionProjectView(imageContainer, folderContainer, () => {
     imageContainer.replaceChildren();
-    projectTitle.textContent = 'Projects';
+    projectTitle.textContent = site.sections.projects;
     projectToolbar.hidden = true;
     activeCard = undefined;
   }, activeCard, true);
@@ -90,7 +92,7 @@ function closeFolder() {
 function createFolder(folder) {
   const card = element('button', 'project-folder');
   card.type = 'button';
-  card.setAttribute('aria-label', `Open ${folder.title}`);
+  card.setAttribute('aria-label', `${site.projects.openLabel} ${folder.title}`);
   card.setAttribute('aria-controls', 'project-images');
   if (/^#[\da-f]{6}$/i.test(folder.color || '')) card.style.setProperty('--folder-color', folder.color);
   const scene = element('span', 'folder-scene');
@@ -134,10 +136,10 @@ async function loadFolders() {
       }
     }
     folderContainer.replaceChildren(...folders.map(createFolder));
-    if (!folders.length) folderContainer.append(element('p', 'projects-status', 'New work is on the way.'));
+    if (!folders.length) folderContainer.append(element('p', 'projects-status', site.projects.empty));
   } catch (error) {
     console.error('Could not load project folders:', error);
-    const message = element('p', 'projects-status', 'The folders couldn’t load. Please try refreshing.');
+    const message = element('p', 'projects-status', site.projects.error);
     message.setAttribute('role', 'status');
     folderContainer.replaceChildren(message);
   }

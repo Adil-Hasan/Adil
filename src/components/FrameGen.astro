@@ -1,4 +1,17 @@
-<section class="content-section" id="framegen" aria-labelledby="framegen-title">
-  <h2 id="framegen-title">FrameGen</h2>
-  <div class="section-content"></div>
+---
+import framegen from '../../public/framegen.json';
+const assetUrl = path => `${import.meta.env.BASE_URL}${path.replace(/^\.?\//, '')}`;
+---
+
+<section class="content-section framegen-section" id="framegen" aria-labelledby="framegen-title">
+  <h2 class="framegen-brand" id="framegen-title">
+    <img src={assetUrl(framegen.logo.src)} alt={framegen.logo.alt} width="667" height="103" loading="lazy" decoding="async" />
+  </h2>
+  <p class="framegen-tagline">{framegen.taglineLines.map(line => <span>{line}</span>)}</p>
+  <div class="framegen-previews">
+    {framegen.screenshots.map((image, index) => (
+      <img class={`framegen-screenshot framegen-screenshot-${index + 1}`} src={assetUrl(image.src)} alt={image.alt} width="475" height="603" loading="lazy" decoding="async" />
+    ))}
+  </div>
+  <a class="framegen-cta" href={framegen.button.url} target="_blank" rel="noopener noreferrer" data-poster-collision="solid">{framegen.button.label}</a>
 </section>

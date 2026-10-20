@@ -1,0 +1,15 @@
+{
+  "logo": { "src": "framegen/logo.svg", "alt": "FrameGen" },
+  "taglineLines": [
+    "It's time to stop",
+    "retyping on your template"
+  ],
+  "screenshots": [
+    { "src": "framegen/generate-light.png", "alt": "FrameGen layout and image settings, spreadsheet upload, and matching spreadsheet columns to Figma layers." },
+    { "src": "framegen/export-light.png", "alt": "FrameGen PPTX and PDF export settings with a queue of six selected product card frames." }
+  ],
+  "button": {
+    "label": "Try in Figma",
+    "url": "https://www.figma.com/community/plugin/1690822817256923421"
+  }
+}

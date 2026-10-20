@@ -7,11 +7,12 @@ import Career from '../components/Career.astro';
 import FrameGen from '../components/FrameGen.astro';
 import Contact from '../components/Contact.astro';
 import PosterPlayground from '../components/PosterPlayground.astro';
+import site from '../../public/site.json';
 ---
 
 <BaseLayout>
   <canvas id="dot-grid" aria-hidden="true"></canvas>
-  <a class="skip-link" href="#main">Skip to content</a>
+  <a class="skip-link" href="#main">{site.accessibility.skipContent}</a>
   <main id="main">
     <Hero />
     <SiteHeader />
@@ -29,4 +30,5 @@ import PosterPlayground from '../components/PosterPlayground.astro';
   import '../scripts/app.js';
   import '../scripts/project-gallery.js';
   import '../scripts/career-flow.js';
+  import '../scripts/contact.js';
 </script>

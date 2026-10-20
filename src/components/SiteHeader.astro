@@ -1,9 +1,10 @@
+---
+import site from '../../public/site.json';
+---
+
 <header class="site-header">
-  <a class="wordmark" href="#home" aria-label="Adil Hasan, home">Adil Hasan</a>
-  <nav aria-label="Main navigation">
-    <a href="#projects">Projects</a>
-    <a href="#career">Career</a>
-    <a href="#framegen">FrameGen</a>
-    <a href="#contact">Contact</a>
+  <a class="wordmark" href="#home" aria-label={`${site.name}, ${site.accessibility.home}`}>{site.name}</a>
+  <nav aria-label={site.accessibility.mainNavigation}>
+    {Object.entries(site.sections).map(([id, label]) => <a href={`#${id}`}>{label}</a>)}
   </nav>
 </header>

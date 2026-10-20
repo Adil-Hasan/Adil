@@ -1,4 +1,38 @@
-<section class="content-section" id="contact" aria-labelledby="contact-title">
-  <h2 id="contact-title">Contact</h2>
-  <div class="section-content"></div>
+---
+import site from '../../public/site.json';
+import contact from '../../public/contact.json';
+import ContactIcon from './ContactIcon.astro';
+---
+
+<section class="content-section contact-section" id="contact" aria-labelledby="contact-title">
+  <h2 id="contact-title">{site.sections.contact}</h2>
+  <p class="contact-intro">{contact.description}</p>
+  <div class="contact-cards">
+    {contact.cards.map(card => {
+      const Tag = card.platform === 'mail' ? 'button' : 'a';
+      return <Tag class="contact-card" data-platform={card.platform} data-poster-collision="solid"
+        style={`--contact-color: ${card.color}; --contact-tilt: ${card.rotation}deg`}
+        {...(card.platform === 'mail'
+          ? { type: 'button', 'aria-label': `${card.label}: ${contact.copy.label}`, 'data-copy-email': contact.email }
+          : { href: card.url, target: '_blank', rel: 'noopener noreferrer' })}>
+        <span class="contact-icon">
+          {card.icon
+            ? <img src={`${import.meta.env.BASE_URL}${card.icon.replace(/^\.?\//, '')}`} alt="" width="38" height="38" />
+            : <ContactIcon platform={card.platform} />}
+        </span>
+        <span class="contact-card-label">{card.label}</span>
+        <span class="contact-card-detail">{card.platform === 'mail' ? contact.copy.label : card.detail}</span>
+        <svg class="contact-action-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          {card.platform === 'mail'
+            ? <g stroke="currentColor" stroke-width="1.4"><rect x="7" y="7" width="10" height="10" rx="2" /><path d="M4 13H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v1" /></g>
+            : <path d="M4 16 16 4M5 4h11v11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />}
+        </svg>
+      </Tag>;
+    })}
+  </div>
+  <p class="contact-feedback" id="contact-feedback" role="status" aria-live="polite"></p>
+  <div class="contact-copy-fallback" hidden>
+    <label for="contact-email">{contact.copy.emailLabel}</label>
+    <input id="contact-email" type="text" value={contact.email} data-poster-collision="solid" readonly />
+  </div>
 </section>
