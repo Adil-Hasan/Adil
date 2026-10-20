@@ -143,4 +143,3 @@ export function validatePosterContent(posters) {
   if (!['http:', 'https:'].includes(url.protocol)) fail('posters', 'crash.errorDetailsUrl must be an HTTP or HTTPS address.');
 }
 import { MESSAGE_FONTS, MESSAGE_BOXES } from '../src/scripts/cleanup-appearance.js';
-
