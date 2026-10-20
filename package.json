@@ -8,7 +8,7 @@
     "start": "astro dev",
     "build": "node scripts/validate-projects.mjs && node scripts/validate-career.mjs && node scripts/validate-editable.mjs && astro build",
     "preview": "astro preview",
-    "check": "node --check src/scripts/app.js && node --check src/scripts/poster-playground.js && node --check src/scripts/poster-physics.js && node --check src/scripts/poster-layout.js && node --check src/scripts/project-gallery.js && node --check src/scripts/career-flow.js && node --check src/scripts/contact.js && node --check astro.config.mjs && node --check scripts/validate-projects.mjs && node scripts/validate-projects.mjs && node --check scripts/validate-career.mjs && node scripts/validate-career.mjs && node --check src/scripts/cleanup-appearance.js && node --check src/scripts/poster-colliders.js && node --check src/scripts/career-layout.js && node scripts/validate-editable.mjs",
+    "check": "node --check src/scripts/app.js && node --check src/scripts/poster-playground.js && node --check src/scripts/poster-physics.js && node --check src/scripts/poster-layout.js && node --check src/scripts/project-gallery.js && node --check src/scripts/project-content.js && node --check src/scripts/career-flow.js && node --check src/scripts/contact.js && node --check src/scripts/wrap-motion.js && node --check astro.config.mjs && node --check scripts/validate-projects.mjs && node scripts/validate-projects.mjs && node --check scripts/validate-career.mjs && node scripts/validate-career.mjs && node --check src/scripts/cleanup-appearance.js && node --check src/scripts/poster-colliders.js && node --check src/scripts/career-layout.js && node scripts/validate-editable.mjs",
     "test": "node --test"
   },
   "engines": {

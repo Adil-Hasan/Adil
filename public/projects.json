@@ -4,27 +4,126 @@
       "title": "Design",
       "color": "#d5b77c",
       "images": [
-        { "src": "./projects/design/01.svg", "alt": "Sample typographic poster with large letterforms", "title": "Typography study · sample preview" },
-        { "src": "./projects/design/02.svg", "alt": "Sample blue geometric identity study", "title": "Identity study · sample preview" },
-        { "src": "./projects/design/03.svg", "alt": "Sample coral editorial layout", "title": "Editorial study · sample preview" }
+        {
+          "src": "./projects/design/01.svg",
+          "alt": "Sample typographic poster with large letterforms",
+          "title": "Typography study · sample preview",
+          "article": {
+            "title": "Typography study",
+            "body": [
+              "A demo study in scale, contrast, and hierarchy. Large letterforms give the composition a clear focal point, while a restrained palette keeps the smaller details readable.",
+              "The aim is to make a few elements carry the whole poster. Type, spacing, a single shape, and a short line of copy each have a specific job."
+            ]
+          }
+        },
+        {
+          "src": "./projects/design/02.svg",
+          "alt": "Sample blue geometric identity study",
+          "title": "Identity study · sample preview",
+          "article": {
+            "title": "Identity study",
+            "body": [
+              "A sample visual system built from simple geometric pieces. Circles and squares share a grid, giving the layout a consistent rhythm without making every area look the same.",
+              "This is a place to describe the project brief, the choices behind the design, and how the system could extend into other formats."
+            ]
+          }
+        },
+        {
+          "src": "./projects/design/03.svg",
+          "alt": "Sample coral editorial layout",
+          "title": "Editorial study · sample preview",
+          "article": {
+            "title": "Editorial study",
+            "body": [
+              "A demo editorial layout that balances an oversized headline with a quieter supporting composition. The warm palette connects the text and shapes.",
+              "Replace this paragraph with your process: what you tried, what changed, and why the final arrangement works for the piece."
+            ]
+          }
+        }
       ]
     },
     {
       "title": "FrameGen",
       "color": "#a7b8a0",
       "images": [
-        { "src": "./projects/framegen/01.svg", "alt": "Illustration of data flowing into a design grid", "title": "Data to design · sample preview" },
-        { "src": "./projects/framegen/02.svg", "alt": "Illustration of repeated frames in a production workflow", "title": "Frame workflow · sample preview" },
-        { "src": "./projects/framegen/03.svg", "alt": "FrameGen typographic concept artwork", "title": "FrameGen concept · sample preview" }
+        {
+          "src": "./projects/framegen/01.svg",
+          "alt": "Illustration of data flowing into a design grid",
+          "title": "Data to design · sample preview",
+          "article": {
+            "title": "Data to design",
+            "body": [
+              "A sample illustration of the route from structured data to a finished design. It explores how a spreadsheet can become a useful part of a visual workflow.",
+              "Use this article to explain the idea behind the work, show its context, and describe what a viewer should notice in the image."
+            ]
+          }
+        },
+        {
+          "src": "./projects/framegen/02.svg",
+          "alt": "Illustration of repeated frames in a production workflow",
+          "title": "Frame workflow · sample preview",
+          "article": {
+            "title": "Frame workflow",
+            "body": [
+              "A demo study of repeated frames and a more consistent production workflow. The composition focuses on the relationship between a template and the variations it can produce.",
+              "Replace this sample text with the real workflow, its constraints, and the decisions that shaped the final result."
+            ]
+          }
+        },
+        {
+          "src": "./projects/framegen/03.svg",
+          "alt": "FrameGen typographic concept artwork",
+          "title": "FrameGen concept · sample preview",
+          "article": {
+            "title": "FrameGen concept",
+            "body": [
+              "A typographic concept for FrameGen, using a short message and a limited visual vocabulary. The layout explores how the tool could introduce itself in a single poster.",
+              "This article can hold the story behind the concept, alternative directions, and notes about how it developed."
+            ]
+          }
+        }
       ]
     },
     {
       "title": "Experiments",
       "color": "#b0a6cc",
       "images": [
-        { "src": "./projects/experiments/01.svg", "alt": "Sample green halftone sphere experiment", "title": "Halftone study · sample preview" },
-        { "src": "./projects/experiments/02.svg", "alt": "Sample orange concentric shape experiment", "title": "Shape study · sample preview" },
-        { "src": "./projects/experiments/03.svg", "alt": "Sample violet orbital composition", "title": "Orbit study · sample preview" }
+        {
+          "src": "./projects/experiments/01.svg",
+          "alt": "Sample green halftone sphere experiment",
+          "title": "Halftone study · sample preview",
+          "article": {
+            "title": "Halftone study",
+            "body": [
+              "A small experiment in halftone texture and the suggestion of volume. Repeated marks build a sphere while leaving space around its silhouette.",
+              "Describe your materials, tools, or technique here, along with the visual question you wanted the experiment to answer."
+            ]
+          }
+        },
+        {
+          "src": "./projects/experiments/02.svg",
+          "alt": "Sample orange concentric shape experiment",
+          "title": "Shape study · sample preview",
+          "article": {
+            "title": "Shape study",
+            "body": [
+              "A demo experiment with repeated shapes and concentric rhythm. Small changes in spacing give a simple form a sense of movement.",
+              "Use this space for the process behind the image, what you learned, or the next direction you would like to explore."
+            ]
+          }
+        },
+        {
+          "src": "./projects/experiments/03.svg",
+          "alt": "Sample violet orbital composition",
+          "title": "Orbit study · sample preview",
+          "article": {
+            "title": "Orbit study",
+            "body": [
+              "A sample composition built around overlapping orbital lines. Repetition creates a loose structure, while the central shape gives the eye somewhere to settle.",
+              "Replace this demo copy with the story behind your own study. Each paragraph here becomes a separate paragraph in the article."
+            ]
+          }
+        }
       ]
     }
   ]

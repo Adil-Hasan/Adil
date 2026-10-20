@@ -8,7 +8,7 @@ const careerCards = career.cards.map((card, index) => ({ ...card, stickers: layo
 const assetUrl = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\.?\//, '')}`;
 ---
 
-<section class="content-section career-section" id="career" aria-labelledby="career-title" style={`--career-max-width: ${career.settings.maxWidth}px; --career-max-image-height: ${career.settings.maxImageHeight}px; --image-padding: ${career.settings.padding}px`}>
+<section class="content-section career-section" id="career" aria-labelledby="career-title" style={`--career-image-height: ${career.settings.imageHeight}px; --image-padding: ${career.settings.padding}px`}>
   <div class="section-heading">
     <h2 id="career-title">{site.sections.career}</h2>
   </div>

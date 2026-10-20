@@ -2,9 +2,9 @@
 import site from '../../public/site.json';
 ---
 
-<section class="content-section" id="projects" aria-labelledby="projects-title">
+<section class="content-section projects-section" id="projects" aria-labelledby="projects-title">
   <div class="section-heading">
-    <h2 id="projects-title">{site.sections.projects}</h2>
+    <h2 id="projects-title" tabindex="-1">{site.sections.projects}</h2>
   </div>
   <div class="projects-toolbar" hidden>
     <button class="projects-back" type="button" aria-label={site.projects.backLabel}>
@@ -16,4 +16,5 @@ import site from '../../public/site.json';
     <p class="projects-status" role="status">{site.projects.loading}</p>
   </div>
   <div class="section-content project-images" id="project-images" hidden></div>
+  <article class="project-article" id="project-article" aria-labelledby="projects-title" hidden></article>
 </section>

@@ -33,6 +33,8 @@
     "imageError": "Image unavailable",
     "back": "Back",
     "backLabel": "Back to project folders",
+    "backToImagesLabel": "Back to project images",
+    "openArticleLabel": "Read article:",
     "openLabel": "Open",
     "imagesLabel": "images"
   },

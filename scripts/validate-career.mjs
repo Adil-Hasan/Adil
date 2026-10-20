@@ -35,8 +35,7 @@ async function asset(value, name) {
 }
 
 if (!content || typeof content !== 'object' || !content.settings) fail('Include settings and a cards array.');
-number(content.settings.maxWidth, 'settings.maxWidth', 1);
-number(content.settings.maxImageHeight, 'settings.maxImageHeight', 1);
+number(content.settings.imageHeight, 'settings.imageHeight', 1);
 number(content.settings.padding, 'settings.padding', 0);
 if (!Array.isArray(content.cards)) fail('cards must be an array.');
 for (const [index, card] of content.cards.entries()) {

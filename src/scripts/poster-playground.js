@@ -228,7 +228,7 @@ function readSurfaces(dt) {
     previousSurfaces.set(key, rects);
     const repel = element.classList.contains('button-face');
     const launchThrough = Boolean(element.closest('.hero-quote'));
-    const animated = element.matches('.career-sticker img, .burst-star') && !motion.matches;
+    const animated = (element.matches('.career-image, .career-sticker img, .burst-star') || element.closest('[data-reflowing]')) && !motion.matches;
     rects.forEach((rect, index) => {
       if (rect.bottom < -100 || rect.top > innerHeight + 100 || rect.right < 0 || rect.left > innerWidth) return;
       const previous = previousRects[index] || rect;
@@ -526,6 +526,7 @@ window.addEventListener('resize', () => {
 new MutationObserver(() => { refreshColliders = true; wakePosters(); }).observe(document.body,
   { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'src', 'data-poster-collision'], characterData: true });
 document.querySelector('#main').addEventListener('transitionrun', wakePosters);
+document.addEventListener('layout-motion-start', wakePosters);
 document.querySelector('#main').addEventListener('load', wakePosters, true);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) for (const poster of posters) releasePoster(poster, true);

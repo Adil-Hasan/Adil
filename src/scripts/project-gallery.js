@@ -1,13 +1,18 @@
 import site from '../../public/site.json';
+import { validateProjectArticle } from './project-content.js';
 
 const projectsSection = document.querySelector('#projects');
 const folderContainer = document.querySelector('#project-folders');
 const imageContainer = document.querySelector('#project-images');
+const articleContainer = document.querySelector('#project-article');
 const projectTitle = document.querySelector('#projects-title');
 const projectToolbar = document.querySelector('.projects-toolbar');
 const backButton = document.querySelector('.projects-back');
 const projectMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let activeCard;
+let activeFolder;
+let articleTrigger;
+let articleReturnScroll = 0;
 let changingView = false;
 
 function element(tag, className, text) {
@@ -22,7 +27,7 @@ function scrollToProjects() {
   projectsSection.scrollIntoView({ block: 'start', behavior: projectMotion.matches ? 'instant' : 'smooth' });
 }
 
-async function transitionProjectView(outgoing, incoming, update, focusTarget, returning = false) {
+async function transitionProjectView(outgoing, incoming, update, focusTarget, returning = false, restoreScroll) {
   if (changingView) return;
   changingView = true;
   projectsSection.setAttribute('aria-busy', 'true');
@@ -37,7 +42,8 @@ async function transitionProjectView(outgoing, incoming, update, focusTarget, re
     outgoing.hidden = true;
     update();
     incoming.hidden = false;
-    scrollToProjects();
+    if (restoreScroll === undefined) scrollToProjects();
+    else window.scrollTo({ top: restoreScroll, behavior: projectMotion.matches ? 'instant' : 'smooth' });
     focusTarget.focus({ preventScroll: true });
     if (!projectMotion.matches) {
       await incoming.animate([
@@ -52,30 +58,73 @@ async function transitionProjectView(outgoing, incoming, update, focusTarget, re
   }
 }
 
+function projectImage(image, className) {
+  const preview = element('img', className);
+  preview.src = image.src;
+  preview.alt = image.alt;
+  preview.decoding = 'async';
+  preview.addEventListener('error', () => {
+    const fallback = element('span', 'project-image-error', site.projects.imageError);
+    fallback.setAttribute('role', 'status');
+    preview.replaceWith(fallback);
+  }, { once: true });
+  return preview;
+}
+
+function openArticle(image, trigger) {
+  if (changingView || !activeFolder) return;
+  const title = image.article?.title || image.title || image.alt;
+  const artwork = element('figure', 'project-article-artwork');
+  artwork.append(projectImage(image, 'project-article-image'));
+  const copy = element('div', 'project-article-copy');
+  copy.append(element('p', 'project-article-category', activeFolder.title));
+  for (const paragraph of image.article?.body || []) copy.append(element('p', 'project-article-paragraph', paragraph));
+  articleContainer.replaceChildren(artwork, copy);
+  articleReturnScroll = window.scrollY;
+  transitionProjectView(imageContainer, articleContainer, () => {
+    articleTrigger = trigger;
+    projectTitle.textContent = title;
+    backButton.setAttribute('aria-label', site.projects.backToImagesLabel);
+    backButton.setAttribute('aria-controls', 'project-images');
+  }, projectTitle);
+}
+
+function closeArticle() {
+  if (changingView || !articleTrigger) return;
+  const trigger = articleTrigger;
+  transitionProjectView(articleContainer, imageContainer, () => {
+    articleContainer.replaceChildren();
+    articleTrigger = undefined;
+    projectTitle.textContent = activeFolder.title;
+    backButton.setAttribute('aria-label', site.projects.backLabel);
+    backButton.setAttribute('aria-controls', 'project-folders');
+  }, trigger, true, articleReturnScroll);
+}
+
 function openFolder(folder, card) {
   if (changingView) return;
   imageContainer.setAttribute('aria-label', `${folder.title} ${site.projects.imagesLabel}`);
   imageContainer.replaceChildren(...folder.images.map((image) => {
     const figure = element('figure', 'project-image');
-    const preview = element('img');
-    preview.src = image.src;
-    preview.alt = image.alt;
+    const preview = projectImage(image);
     preview.loading = 'lazy';
     preview.decoding = 'async';
-    const frame = element('div', 'project-image-frame');
+    const frame = element('button', 'project-image-frame project-image-open');
+    frame.type = 'button';
+    frame.setAttribute('aria-label', `${site.projects.openArticleLabel} ${image.article?.title || image.title || image.alt}`);
+    frame.setAttribute('aria-controls', 'project-article');
+    frame.addEventListener('click', () => openArticle(image, frame));
     frame.append(preview);
     figure.append(frame, element('figcaption', 'project-image-name', image.title || image.alt));
-    preview.addEventListener('error', () => {
-      const fallback = element('span', 'project-image-error', site.projects.imageError);
-      fallback.setAttribute('role', 'status');
-      frame.replaceChildren(fallback);
-    }, { once: true });
     return figure;
   }));
   transitionProjectView(folderContainer, imageContainer, () => {
     activeCard = card;
+    activeFolder = folder;
     projectTitle.textContent = folder.title;
     projectToolbar.hidden = false;
+    backButton.setAttribute('aria-label', site.projects.backLabel);
+    backButton.setAttribute('aria-controls', 'project-folders');
   }, backButton);
 }
 
@@ -86,6 +135,7 @@ function closeFolder() {
     projectTitle.textContent = site.sections.projects;
     projectToolbar.hidden = true;
     activeCard = undefined;
+    activeFolder = undefined;
   }, activeCard, true);
 }
 
@@ -128,6 +178,7 @@ async function loadFolders() {
       }
       for (const image of folder.images) {
         if (!image.src || !image.alt) throw new Error('Every image needs src and alt text.');
+        validateProjectArticle(image.article, `${folder.title}: ${image.title || image.alt} article`);
         const url = new URL(image.src, document.baseURI);
         if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Images must use local paths or HTTPS URLs.');
         image.src = /^https?:\/\//.test(image.src)
@@ -145,5 +196,8 @@ async function loadFolders() {
   }
 }
 
-backButton.addEventListener('click', closeFolder);
+backButton.addEventListener('click', () => articleTrigger ? closeArticle() : closeFolder());
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && articleTrigger) closeArticle();
+});
 loadFolders();

@@ -31,7 +31,7 @@ export function validateSiteContent(site) {
     if (!Array.isArray(lines) || lines.length !== count) fail('site', `hero.${key} needs exactly ${count} lines.`);
     lines.forEach((line, index) => text(line, 'site', `hero.${key}[${index}]`));
   }
-  texts(site.projects, ['loading', 'empty', 'error', 'imageError', 'back', 'backLabel', 'openLabel', 'imagesLabel'], 'site', 'projects');
+  texts(site.projects, ['loading', 'empty', 'error', 'imageError', 'back', 'backLabel', 'backToImagesLabel', 'openArticleLabel', 'openLabel', 'imagesLabel'], 'site', 'projects');
   texts(site.accessibility, ['introduction', 'mainNavigation', 'home', 'skipContent'], 'site', 'accessibility');
 }
 

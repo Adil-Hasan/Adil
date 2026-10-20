@@ -259,19 +259,33 @@ New content must keep this behavior unless you explicitly request an exception. 
 
 ## Career cards
 
-Open [public/career.json](public/career.json). The `settings` at the top apply to every career card. All three values use pixels.
+Open [public/career.json](public/career.json). The two `settings` values at the top apply to every career card and use pixels:
 
-Career cards wrap naturally as the available space changes. Each entry aims for `maxWidth`, currently 320px, and moves to the next row when it no longer fits beside another entry. On screens narrower than a card, it shrinks to fit. Rows stay centered, including the final row. There are no fixed column counts or column breakpoints. Image proportions, tilt, PNG stickers, and poster collisions work in every layout.
+```json
+"settings": {
+  "imageHeight": 480,
+  "padding": 14
+}
+```
+
+Set `imageHeight` to a positive number to change the shared image height. Set `padding` to zero or a positive number to change the colored border thickness. For example, use `"imageHeight": 360` for smaller cards. The old `maxWidth` and `maxImageHeight` fields have been replaced by `imageHeight`; do not add them back.
+
+Career cards wrap naturally as the available space changes. Images share `imageHeight`, currently 480px. Each entry takes its width from the image proportions and moves to the next row when it no longer fits beside another entry. On screens narrower than a card, it shrinks to fit. Rows stay centered, including the final row. There are no fixed column counts or column breakpoints. Image proportions, tilt, PNG stickers, and poster collisions work in every layout.
+
+Career entries, project folders, gallery images, and Find Me cards glide into their new positions over 360ms when their wrapping container changes width. Resizing again during the movement continues from the current visible position. Card tilt and hover effects stay independent, and collisions follow the moving content. Reduced-motion preferences skip the movement. The shared behavior lives in `src/scripts/wrap-motion.js`; new items added through the JSON files inherit it automatically.
 
 | Setting | What it changes |
 | --- | --- |
-| `maxWidth` | Preferred width of each entry in pixels, capped by the available space. Increase it for larger cards and earlier wrapping; decrease it to fit more cards on a row. |
-| `maxImageHeight` | Maximum image height before scaling down |
+| `imageHeight` | Shared image height in pixels, currently 480. Width follows image proportions. On phones, images scale down to fit the screen. |
 | `padding` | Width of the colored frame around the image |
 
 Images keep their own proportions. The frame follows the image without cropping or stretching.
 
 Each main image gets a subtle random tilt of 1 to 2 degrees when the page loads. The frame, caption, and sticker positions stay fixed.
+
+The first card currently previews a sideways landscape image at `career/landscape-demo.svg`. To restore its portrait artwork, set that card's `image.src` to `projects/design/01.svg` and update `image.alt` to describe the portrait. Landscape images use their natural proportions, keeping the same frame padding and image height with a wider card.
+
+Hovering over a career image straightens it and enlarges it by 2.5% over 300ms. It returns to its original tilt when the pointer leaves. Focusing a sticker also straightens its image. The frame and stickers stay in place, and poster collision follows the image during the transition. Reduced-motion preferences skip the transition. Adjust this effect in `.career-image` and `.career-image-stage` in `src/styles/global.css`.
 
 Main images and PNG stickers both block falling posters. Collision areas follow their displayed size and position as the page scrolls.
 
@@ -324,7 +338,9 @@ Sticker popups fade and rise into place with a small spring over 260ms on hover,
 
 Open [public/projects.json](public/projects.json). Each object inside `folders` creates one folder. Its `title` is the folder name, `color` is its color, and `images` lists its contents.
 
-Folders and the images inside them also wrap automatically. Folders aim for 300px wide, and gallery items aim for 320px. They shrink to fit narrow screens and move onto another centered row whenever there is not enough room. These layout sizes live in `.project-folder` and `.project-image` in `src/styles/global.css`.
+Folders and the images inside them also wrap automatically. Both aim for 320px wide. Career cards instead share an image height and vary in width. They shrink to fit narrow screens and move onto another centered row whenever there is not enough room. These layout sizes live in `.project-folder` and `.project-image` in `src/styles/global.css`.
+
+Projects, study galleries, and career entries share spacing variables on `.content-sections` in `src/styles/global.css`: `--collection-column-gap` controls horizontal gaps, `--collection-row-gap` controls row gaps, `--collection-heading-gap` controls the gap after the section heading, and `--collection-section-space` controls section padding. Folders reserve 52px above their scene for the protruding preview images. Their row gap compensates for the scene's unused bottom edge so the visible gap matches the study rows. The gallery has a separate Back row with a 24px gap before the artwork. Projects and Career grow with their content instead of centering short collections inside a full-screen section. Adding a fourth item does not switch the spacing rules.
 
 - Change an image's `src` to replace it, and `title` to change its caption.
 - Write a short visual description in `alt`.
@@ -333,6 +349,29 @@ Folders and the images inside them also wrap automatically. Folders aim for 300p
 - Copy an entire folder object to add another project.
 
 A complete folder example is in [README.md](README.md#update-the-project-folders).
+
+### Articles for project images
+
+Clicking a gallery image opens its article inside Projects. Back or Escape returns to the image grid and restores the selected image's keyboard focus and scroll position. On narrow screens, article text wraps below the artwork. The image, text, and Back button keep poster collision.
+
+In `public/projects.json`, add an `article` object to each image:
+
+```json
+{
+  "src": "./projects/my-project/01.jpg",
+  "alt": "A description of the artwork",
+  "title": "Gallery caption",
+  "article": {
+    "title": "My project story",
+    "body": [
+      "Introduce the project here.",
+      "Describe the process or the result in another paragraph."
+    ]
+  }
+}
+```
+
+`article.title` is the article heading. `article.body` is an array of paragraphs, using plain text rather than HTML. Add or remove strings to change the number of paragraphs. The article uses the same image as the gallery, so changing `src` updates both. Use `"body": []` for an image-only article. If `article` is omitted, the image still opens using its gallery title (or `alt`) as the heading. Edit the navigation labels through `projects.backToImagesLabel` and `projects.openArticleLabel` in `public/site.json`. The supplied articles are demo copy ready to replace.
 
 ## Saving and publishing
 

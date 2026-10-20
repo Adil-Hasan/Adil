@@ -35,7 +35,7 @@ Each message has a close button and a vacuum icon, with no portrait. Closing it 
 
 ## Career cards
 
-Edit `public/career.json` to change career titles, descriptions, frame colors, images, and PNG stickers. The settings at the top control maximum width, maximum image height, and frame padding for every card. Cards keep a preferred width and wrap onto another centered row when they no longer fit. Change `maxWidth` to adjust their size and wrapping. Each frame follows its image’s proportions without cropping. Copy a card object to add a card, reorder objects to reorder cards, or remove an object to remove a card.
+Edit `public/career.json` to change career titles, descriptions, frame colors, images, and PNG stickers. Set `settings.imageHeight` to change the shared image height, currently 480 pixels, and `settings.padding` to change frame padding. Width follows each image's proportions, so landscape images get wider cards. Cards wrap onto centered rows and scale down on phones. Copy a card object to add a card, reorder objects to reorder cards, or remove an object to remove a card. Examples and field descriptions are in [EDITING.md](EDITING.md#career-cards).
 
 The [editing guide](EDITING.md#career-cards) has complete card and sticker examples and a field reference. Each card allows up to four PNG stickers. Their edge positions vary by card and stay fixed across refreshes and rebuilds. Optional `x` and `y` fields override placement; width uses a percentage of the image. Stickers animate automatically and show details on hover, keyboard focus, or tap. Press Escape or tap outside to dismiss.
 
@@ -57,6 +57,8 @@ All project content lives in **`public/projects.json`**. Each entry in `folders`
 2. Add or edit an entry in `public/projects.json` using the example below. Image URLs omit `public/`.
 3. Refresh the browser. No build is needed during local development.
 
+Click a gallery image to read an article featuring that image. Add `"article": { "title": "My project story", "body": ["First paragraph.", "Second paragraph."] }` to its image entry. Back or Escape returns to the gallery. Full field descriptions and a copyable example are in [EDITING.md](EDITING.md#articles-for-project-images).
+
 ```json
 {
   "title": "My project",
@@ -76,7 +78,7 @@ All project content lives in **`public/projects.json`**. Each entry in `folders`
 - `color` accepts a six-digit hex color. The folder's `title` appears on its front; each image's `title` appears beneath its image, falling back to `alt` when omitted.
 - JPG, PNG, WebP, AVIF, GIF, and SVG images are supported. Landscape images crop in the folder preview and display in full in the image gallery.
 - The included SVGs are **sample artwork**, ready to replace with actual project images.
-- Folders flow into additional rows whenever they no longer fit. Desktop sections occupy at least one viewport; mobile layouts grow naturally.
+- Folders flow into additional rows whenever they no longer fit. Projects and Career grow with their content, with shared gaps across folder, gallery, and career rows.
 
 ## Build and deploy
 

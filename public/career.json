@@ -1,7 +1,6 @@
 {
   "settings": {
-    "maxWidth": 320,
-    "maxImageHeight": 480,
+    "imageHeight": 480,
     "padding": 14
   },
   "cards": [
@@ -10,8 +9,8 @@
       "description": "Visual identities, typography and art direction.",
       "color": "#c5d8b6",
       "image": {
-        "src": "projects/design/01.svg",
-        "alt": "Cream typography poster with large Aa lettering and a lime arrow."
+        "src": "career/landscape-demo.svg",
+        "alt": "Cream typography poster turned sideways for a landscape card preview."
       },
       "stickers": [
         {
