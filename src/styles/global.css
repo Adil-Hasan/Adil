@@ -392,6 +392,9 @@ figcaption { margin-top: calc(5 * var(--unit)); }
   50% { transform: translateY(-8px) rotate(2deg); }
 }
 @media (max-width: 600px) {
+  .contact-cards { gap: 24px 18px; padding: 10px 4px; }
+  .contact-card { flex-basis: calc((100% - 18px) / 2); width: calc((100% - 18px) / 2); min-width: 0; min-height: 140px; padding: 16px 12px; }
+  .contact-card-detail { padding-right: 0; }
   .career-caption { margin-bottom: 20px; }
   .career-image { height: auto; max-height: var(--career-image-height); }
 }

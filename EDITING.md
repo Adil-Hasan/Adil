@@ -90,7 +90,7 @@ A link card looks like this:
 }
 ```
 
-`url` is a complete `https://` or `http://` address. Links open in a new tab. `label` is the platform name, and `detail` is the small line below it. `color` requires a six-digit hex color. `rotation` sets the fixed tilt in degrees from -12 to 12; negative values lean left, positive values lean right. Cards straighten and lift on hover or keyboard focus. They wrap according to the available space and collide with posters.
+`url` is a complete `https://` or `http://` address. Links open in a new tab. `label` is the platform name, and `detail` is the small line below it. `color` requires a six-digit hex color. `rotation` sets the fixed tilt in degrees from -12 to 12; negative values lean left, positive values lean right. Cards straighten and lift on hover or keyboard focus. They wrap according to the available space and collide with posters. On screens up to 600px wide, contacts stay in two columns with smaller padding and gaps. An odd final card stays centered. These phone layout rules are in the mobile `.contact-cards` and `.contact-card` styles in `src/styles/global.css`.
 
 `platform` chooses the built-in icon and behavior. Use `mail`, `facebook`, `youtube`, `linkedin`, `instagram`, `github`, or `supportkori`, once each at most. Built-in icon artwork lives in `src/components/ContactIcon.astro`.
 
